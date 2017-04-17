@@ -118,6 +118,7 @@ public class RawProduction : BaseProduction
             if (ProductionTimer >= ProductionTime)
             {
                 OutputStorage.Add(new StorageItem(OutputProduct[ProductionMode]));
+                ProductionFinished();
                 ProductionTimer = 0;
                 inProduction = false;
             }

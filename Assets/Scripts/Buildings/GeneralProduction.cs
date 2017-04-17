@@ -90,6 +90,7 @@ public class GeneralProduction : BaseProduction
             if (ProductionTimer >= ProductionTime)
             {
                 OutputStorage.Add(new StorageItem(OutputProduct));
+                ProductionFinished();
                 ProductionTimer = 0;
                 inProduction = false;
             }

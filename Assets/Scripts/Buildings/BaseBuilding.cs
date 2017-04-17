@@ -75,6 +75,12 @@ public class BaseBuilding : GameEntity
     [HideInInspector]
     public float ConstructionTimer = 0;
 
+    /// <summary>
+    /// The time left until this building dissabpears from the map.
+    /// </summary>
+    [HideInInspector]
+    public float DestructionTimer = 0;
+
     #endregion
 
     #region Protected
@@ -163,6 +169,15 @@ public class BaseBuilding : GameEntity
         OperationalModelData.SetActive(true);
     }
 
+    protected virtual void BuildingDestroyed()
+    {
+        TeamManager.TM.Teams[TeamID].BuildingsList.Remove(this);
+        VictoryController.VC.UpdateMilitary(TeamID);
+
+        // Spawn Destroyed model.
+        // maybe some smoke?
+    }
+
     protected virtual void BeginOperational()
     {
         
@@ -236,6 +251,15 @@ public class BaseBuilding : GameEntity
         ConstructionTimer -= Time.deltaTime;
     }
 
+    private void DestructionUpdate()
+    {
+        DestructionTimer -= Time.deltaTime;
+        if(DestructionTimer <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private bool HasConstructionFinished()
     {
         if(ConstructionTimer <= 0)
@@ -245,14 +269,20 @@ public class BaseBuilding : GameEntity
         return false;
     }
 
+    private bool IsBuildingDestroyed()
+    {
+        return Health <= 0;
+    }
+
     private void SetUpStateMachine()
     {
         // Configure Transistion requiremnts.
-        Condition.BoolCondition ConstructionCondition = new Condition.BoolCondition();
-        ConstructionCondition.Condition = HasConstructionFinished;
+        Condition.BoolCondition ConstructionCondition = new Condition.BoolCondition(HasConstructionFinished);
+        Condition.BoolCondition DestructionCondition = new Condition.BoolCondition(IsBuildingDestroyed);
 
         // Create Transitions.
         SM.Transition ConstructionFinishedTrans = new SM.Transition("Construction Finished", ConstructionCondition, ConstructionFinished);
+        SM.Transition BuildingDestroyedTrans = new SM.Transition("Building Destroyed", DestructionCondition, BuildingDestroyed);
 
         // Create States.
         SM.State UnderConstruction = new SM.State("Under Construction", 
@@ -262,15 +292,22 @@ public class BaseBuilding : GameEntity
             new List<SM.Action>() {  });
 
         SM.State Operational = new SM.State("Operational",
-            null,
+            new List<SM.Transition>() { BuildingDestroyedTrans },
             new List<SM.Action>() { BeginOperational },
             new List<SM.Action>() { BuildingUpdate },
             null);
 
+        SM.State Destroyed = new SM.State("Destroyed",
+            null,
+            null,
+            new List<SM.Action>() { DestructionUpdate },
+            null);
+
         // Add target state to transitions
         ConstructionFinishedTrans.SetTargetState(Operational);
+        BuildingDestroyedTrans.SetTargetState(Destroyed);
 
-        BuildingStateMachine = new SM.StateMachine(null, UnderConstruction, Operational);    
+        BuildingStateMachine = new SM.StateMachine(null, UnderConstruction, Operational, Destroyed);    
 
         // Initialise the machine.
         BuildingStateMachine.InitMachine();

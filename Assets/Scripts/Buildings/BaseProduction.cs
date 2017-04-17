@@ -11,6 +11,16 @@ using UnityEditor;
 public class BaseProduction : BaseBuilding
 {
 
+    #region Enums
+
+    #region Public
+
+    public enum ProductionTypes { Unit, Resource, Culture }
+
+    #endregion
+
+    #endregion
+
     #region Variables
 
     #region Public
@@ -21,6 +31,9 @@ public class BaseProduction : BaseBuilding
 
     public List<GameEntity> OnMapCouriers = new List<GameEntity>();
 
+    // used for testing victrory conditions
+    public ProductionTypes ProductionType;
+
     public float ProductionTimer = 0;
 
     public bool inProduction = false;
@@ -28,6 +41,8 @@ public class BaseProduction : BaseBuilding
     #endregion
 
     #region Protected
+
+    
 
     #endregion
 
@@ -117,6 +132,23 @@ public class BaseProduction : BaseBuilding
     protected virtual IEnumerator ProductionCycle()
     {
         yield return null;
+    }
+
+    protected void ProductionFinished()
+    {
+        switch (ProductionType)
+        {
+            case ProductionTypes.Unit:
+            default:
+                break;
+            case ProductionTypes.Resource:
+                VictoryController.VC.AddEconomicScore(Tier, TeamID);
+                break;
+            case ProductionTypes.Culture:
+                // if we want generation of culture to add to economic do so here.
+                VictoryController.VC.AddCulturalScore(1, TeamID);
+                break;
+        }
     }
 
     #endregion

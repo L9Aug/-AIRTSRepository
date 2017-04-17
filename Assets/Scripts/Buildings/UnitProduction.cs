@@ -96,6 +96,7 @@ public class UnitProduction : BaseProduction
                 for (int i = 0; i < UnitOutput[ProductionMode].Units.Count; ++i)
                 {
                     print("New " + UnitOutput[ProductionMode].Units[i].ToString() + " for Team " + TeamID);
+                    ProductionFinished();
                 }
                 ProductionTimer = 0;
                 inProduction = false;

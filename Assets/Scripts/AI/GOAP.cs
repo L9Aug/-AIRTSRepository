@@ -15,6 +15,7 @@ namespace GOAP
 
     public class GOAP : MonoBehaviour
     {
+        // goal is never assigned
         public AStarInfo<State> Goal;
         public Queue<AStarInfo<State>> ActionPlan;
         public List<AStarInfo<State>> PossibleStates;
@@ -26,6 +27,7 @@ namespace GOAP
         {
             if (ActionPlan.Peek().current.Condition.Test())
             {
+                // here you are dequeueing a plan but not doing anyhting with that plan.
                 ActionPlan.Dequeue();
             }
             

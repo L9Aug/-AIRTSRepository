@@ -10,7 +10,7 @@ namespace GOAP
         //public List<GOAPAction> AvailableActions;
         //public GOAPGoal TargetGoal;
 
-        public List<GOAPAction> GetActionPlan(GOAPAgent Agent,List<GOAPState> WorldState, List<GOAPAction> AvailableActions, GOAPGoal goal)
+        public List<GOAPAction> GetActionPlan(GOAPAgent Agent, List<GOAPState> WorldState, List<GOAPAction> AvailableActions, GOAPGoal goal)
         {
             List<GOAPAction> usable = new List<GOAPAction>();
             for (int i = 0; i < AvailableActions.Count; ++i)

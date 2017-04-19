@@ -11,7 +11,6 @@ namespace GOAP
         public List<GOAPState> Precondition;
         public UtilityAction<GOAPGoal> UtilAction;
 
-
         // Use this for initialization
         void Start()
         {

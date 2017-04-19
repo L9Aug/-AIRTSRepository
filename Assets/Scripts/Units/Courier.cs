@@ -3,45 +3,41 @@ using System.Collections;
 using System.Collections.Generic;
 using Condition;
 using SM;
+using GOAP;
 
 public class Courier : BaseUnit
 {
     public BaseBuilding homeBuilding;
+    public BaseBuilding destination;
+
+
+    public GOAPAgent GOAP;
+
+    HexTile position = new HexTile();
 
     int inventorySpace = 10;
     List<Products> inventory = new List<Products>();
     List<Products> shoppingList = new List<Products>();
-
-    #region States
-    State pickUp;
-    State returnProduct;
-    State atHome;
-    #endregion
-
-    #region Transitions
-    Transition allProductsFound;
-    Transition findNextProduct;
-    Transition getHome;
-    #endregion
-
-    #region Conditions
-    ListHasDataCond<Products> shoppingListEmpty = new ListHasDataCond<Products>();
-    AEqualsB inventoryFull = new AEqualsB();
-    NotCondition shoppingNotEmpty = new NotCondition();
-    NotCondition inventoryNotFull = new NotCondition();
-    AndCondition canFindMore = new AndCondition();
-
-    AndCondition positionCorrect = new AndCondition();
-    AEqualsB columnCorrect = new AEqualsB();
-    AEqualsB rowCorrect = new AEqualsB();
-    #endregion
+    
 
     void Start()
     {
-        SetupStateMachine();
+        //SetupStateMachine();
     }
 
-    void GetPathHome()
+    public List<GOAPState> GetWorldState()
+    {
+        List<GOAPState> worldState = new List<GOAPState>();
+        worldState.Add(new GOAPState("Inventory Full", (inventory.Count >= inventorySpace)));
+        worldState.Add(new GOAPState("Shopping List Empty", (shoppingList.Count == 0)));
+        worldState.Add(new GOAPState("Has Destination", (destination != null)));
+        worldState.Add(new GOAPState("At Home", (hexTransform.Position == homeBuilding.hexTransform.Position)));
+        worldState.Add(new GOAPState("At Destination", (hexTransform.Position == destination.hexTransform.Position)));
+
+        return worldState; 
+    }
+
+    /*void GetPathHome()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, 
             MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, 
@@ -66,7 +62,7 @@ public class Courier : BaseUnit
         positionCorrect.B = rowCorrect;
 
         allProductsFound = new Transition("All products found", shoppingListEmpty, GetPathHome);
-        findNextProduct = new Transition("Find next products", canFindMore, new List<Action>());
+        /*findNextProduct = new Transition("Find next products", canFindMore, new List<Action>());
         getHome = new Transition("Get home", positionCorrect, ReturnHome);
 
         pickUp = new State("Pick up",
@@ -93,8 +89,9 @@ public class Courier : BaseUnit
 
         unitStateMachine = new StateMachine(null, pickUp, returnProduct, atHome);
         unitStateMachine.InitMachine();
+        
     }
-
+    
 
     /*void FindProduct()
     {

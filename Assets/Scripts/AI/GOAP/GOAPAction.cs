@@ -8,6 +8,7 @@ namespace GOAP
 
     public class GOAPAction : MonoBehaviour
     {
+        public GOAPAgent Agent;
         public List<GOAPState> satisfiesStates;
         public List<GOAPState> requiredStates;
         public float Cost;
@@ -34,6 +35,7 @@ namespace GOAP
             {
                 effect();
             }
+            isActive = !TestForFinished();
         }
 
         public virtual bool CanRun(GOAPAgent agent)
@@ -67,7 +69,6 @@ namespace GOAP
                 effects.Remove(action);
             }
         }
-
 
     }
 

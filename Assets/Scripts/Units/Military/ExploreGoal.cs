@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RangedAtkAction : MonoBehaviour {
+public class ExploreGoal : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {

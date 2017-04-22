@@ -136,11 +136,6 @@ public class BaseBuilding : GameEntity
         return new List<KalamataTicket>();
     }
 
-    public virtual void DeliverProducts(params Products[] products)
-    {
-
-    }
-
     public virtual bool TestForProducts(params Products[] products)
     {
         return false;

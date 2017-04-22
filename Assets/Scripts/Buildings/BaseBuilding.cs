@@ -141,6 +141,11 @@ public class BaseBuilding : GameEntity
         return false;
     }
 
+    public virtual void DeliverProducts(params Products[] products)
+    {
+
+    }
+
     #endregion
 
     #region Protected

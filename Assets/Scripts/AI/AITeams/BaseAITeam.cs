@@ -61,22 +61,7 @@ public class BaseAITeam : MonoBehaviour
 
         public int CitizenCount = 0;
         public int MerchantCount = 0;
-        public MilitaryCountClass MilitaryCount = new MilitaryCountClass();
-
-        [System.Serializable]
-        public class MilitaryCountClass
-        {
-            int Soldiers = 0;
-            int Archers = 0;
-            int Catapults = 0;
-
-            public int totalMilitaryUnits()
-            {
-                return Soldiers + Archers + Catapults;
-            }
-        }
-
-    }   
+    }
 
     #endregion
 
@@ -277,6 +262,7 @@ public class BaseAITeam : MonoBehaviour
     #endregion
 
     #endregion
+
 }
 
 

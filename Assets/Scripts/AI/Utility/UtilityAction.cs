@@ -12,10 +12,12 @@ public class UtilityAction<T>
     public UtilityAction()
     {
         Weight = 1;
+        Considerations = new List<UtilityConsideration>();
     }
 
     public UtilityAction(float weight, T objectRef, params UtilityConsideration[] considerations)
     {
+        Considerations = new List<UtilityConsideration>();
         Weight = weight;
         ObjectReference = objectRef;
         Considerations.AddRange(considerations);

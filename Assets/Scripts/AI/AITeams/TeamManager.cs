@@ -17,7 +17,7 @@ public class TeamManager : MonoBehaviour
     /// <summary>
     /// Only Base will work.
     /// </summary>
-    public enum TeamTypes { Base, Tristan, Scott, Oliver }
+    public enum TeamTypes { Utility }
 
     #endregion
 
@@ -86,7 +86,17 @@ public class TeamManager : MonoBehaviour
     /// <param name="TeamID"></param>
     public void AddTeam(TeamTypes newTeam, Vector2 StartingPos, int TeamID)
     {
-        BaseAITeam nTeam = Instantiate(Resources.Load<BaseAITeam>("TeamPrefabs/BaseTeam"));
+        BaseAITeam nTeam = null;// = Instantiate(Resources.Load<BaseAITeam>("TeamPrefabs/BaseTeam"));
+
+        switch (newTeam)
+        {
+            case TeamTypes.Utility:
+            default:
+                GameObject Temp = (GameObject)Instantiate(Resources.Load("TeamPrefabs/" + newTeam.ToString()));
+                nTeam = Temp.GetComponent<BaseAITeam>();
+                break;
+        }
+
         nTeam.StartingLocation = StartingPos;
         nTeam.TeamID = TeamID;
         nTeam.transform.SetParent(transform);
@@ -199,7 +209,7 @@ public class TeamManagerEditor : Editor
     private int columnLabelWidth = 49;
     private int columnValueWidth = 30;
 
-    private TeamManager.TeamTypes selectedType = TeamManager.TeamTypes.Base;
+    private TeamManager.TeamTypes selectedType = TeamManager.TeamTypes.Utility;
     private int newTeamID;
     private Vector2 newTeamStartPosition = Vector2.zero;
 
@@ -275,7 +285,7 @@ public class TeamManagerEditor : Editor
             selectedType = (TeamManager.TeamTypes)EditorGUILayout.EnumPopup("Team Type: ", selectedType);
 
             // Warn the user if the team isn't implemented yet.
-            if(selectedType != TeamManager.TeamTypes.Base)
+            if(selectedType != TeamManager.TeamTypes.Utility)
             {
                 EditorGUILayout.HelpBox("Team type not currently supported", MessageType.Warning);
                 isTeamTypeCorrect = false;

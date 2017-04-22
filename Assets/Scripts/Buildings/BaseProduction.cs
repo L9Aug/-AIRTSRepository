@@ -79,6 +79,20 @@ public class BaseProduction : BaseBuilding
         base.Update();
     }
 
+    protected virtual void SendCourierForProductsFunc()
+    {
+        // create calamata tickets for the products used to create for this building
+
+        // create unit with tickets
+    }
+
+    protected virtual void SendCourierWithProductsFunc()
+    {
+        // find closest storage building with space
+
+        // send courier with products
+    }
+
     protected override void BeginOperational()
     {
         base.BeginOperational();

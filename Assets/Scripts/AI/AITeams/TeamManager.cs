@@ -178,6 +178,7 @@ public class TeamManager : MonoBehaviour
     public void Start()
     {
         TM = this;
+        VictoryController.VC.InitialiseVictoryConditions(Teams.Count);
     }
 
     #endregion

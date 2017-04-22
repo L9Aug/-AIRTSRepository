@@ -12,6 +12,9 @@ public class BaseUnit : GameEntity
     public float moveSpeed;
     public int visionRadius;
     public StateMachine unitStateMachine;
+    public bool SMActive = true;
+
+    public HexTransform Destination;
 
     public State move;
     public List<AStarInfo<HexTile>> path;
@@ -27,7 +30,10 @@ public class BaseUnit : GameEntity
     // Update is called once per frame
     void Update()
     {
-        unitStateMachine.SMUpdate();
+        if (SMActive)
+        {
+            unitStateMachine.SMUpdate();
+        }
     }
 
     public void Move()

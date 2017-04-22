@@ -76,7 +76,7 @@ namespace GOAP
 
                     Node node = new Node(parent, currentState, parent.Cost + usableActions[i].Cost, usableActions[i]);
 
-                    if(StatesInGoal(goal.Precondition, currentState))
+                    if(StatesInGoal(goal.Preconditions, currentState))
                     {
                         leaves.Add(node);
                         foundLeaf = true;

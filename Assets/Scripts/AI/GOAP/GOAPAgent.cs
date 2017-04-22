@@ -28,14 +28,20 @@ namespace GOAP
 
         public List<Action> UpdateAgent()
         {
+
             List<GOAPGoal> goalList = util.RunUtilityEngine();
 
             if(goalList[0] != currentGoal)
             {
                 currentGoal = goalList[0];
-
+                GOAPController.GC.EnqueueForPlanning(this);
                 ActionPlan.Clear();
-                ActionPlan.AddRange(Planner.GetActionPlan(this, WorldState, AvailableActions, currentGoal));
+                //ActionPlan.AddRange(Planner.GetActionPlan(this, WorldState, AvailableActions, currentGoal));
+            }
+
+            if (ActionPlan[0].TestForFinished())
+            {
+                ActionPlan.RemoveAt(0);
             }
 
             return ActionPlan[0].effects;

@@ -2,39 +2,78 @@
 using System.Collections;
 using System.Collections.Generic;
 using Condition;
-using SM;
+//using SM;
 using GOAP;
 
 public class Courier : BaseUnit
 {
-    public BaseBuilding homeBuilding;
-    public BaseBuilding destination;
-
+    public BaseBuilding HomeBuilding;
+    public BaseBuilding DestinationBuilding;
 
     public GOAPAgent GOAP;
 
-    HexTile position = new HexTile();
+    public int inventorySpace = 10;
+    public List<Products> inventory = new List<Products>();
+    public List<Products> shoppingList = new List<Products>();
+    public List<KalamataTicket> ticketList = new List<KalamataTicket>();
 
-    int inventorySpace = 10;
-    List<Products> inventory = new List<Products>();
-    List<Products> shoppingList = new List<Products>();
-    
+    DepositGoal deposit = new DepositGoal();
+    PickupGoal pickup = new PickupGoal();
+
 
     void Start()
     {
-        //SetupStateMachine();
+        SMActive = false;
+        GOAP.util.Actions = new List<UtilityAction<GOAPGoal>>
+        {
+            deposit.UtilAction,
+            pickup.UtilAction
+        };
+        GOAP.AvailableActions.AddRange(GetComponents<GOAPAction>());
+        foreach(GOAPAction action in GOAP.AvailableActions)
+        {
+            action.Agent = GOAP;
+        }
     }
 
     public List<GOAPState> GetWorldState()
     {
-        List<GOAPState> worldState = new List<GOAPState>();
-        worldState.Add(new GOAPState("Inventory Full", (inventory.Count >= inventorySpace)));
-        worldState.Add(new GOAPState("Shopping List Empty", (shoppingList.Count == 0)));
-        worldState.Add(new GOAPState("Has Destination", (destination != null)));
-        worldState.Add(new GOAPState("At Home", (hexTransform.Position == homeBuilding.hexTransform.Position)));
-        worldState.Add(new GOAPState("At Destination", (hexTransform.Position == destination.hexTransform.Position)));
+        List<GOAPState> worldState = new List<GOAPState>
+        {
+            new GOAPState("Has Inventory Space", (inventory.Count < inventorySpace)),
+            new GOAPState("Must Deposit Products", (inventory.Count >= inventorySpace) || (shoppingList.Count == 0)),
+            new GOAPState("Has Destination", (DestinationBuilding != null)),
+            new GOAPState("Tasks Complete", (inventory.Count == 0) && (shoppingList.Count == 0)),
+            new GOAPState("At Home", (hexTransform.Position == HomeBuilding.hexTransform.Position)),
+            new GOAPState("At Destination", (hexTransform.Position == DestinationBuilding.hexTransform.Position)),
+            new GOAPState("Products Available", TeamManager.TM.Teams[TeamID].FindProducts(shoppingList.ToArray())),
+            new GOAPState("Has Tickets", (ticketList.Count > 0)),
 
+        };
         return worldState; 
+    }
+
+    public void Update()
+    {
+        GOAP.SetWorldState(GetWorldState());
+        foreach(Action a in GOAP.UpdateAgent())
+        {
+            a();
+        }
+    }
+
+    public void SetInitialDestinations(BaseBuilding home, BaseBuilding destination)
+    {
+        HomeBuilding = home;
+        DestinationBuilding = destination;
+    }
+
+    public void AddToInventory(List<Products> prods)
+    {
+        foreach(Products product in prods)
+        {
+            inventory.Add(product);
+        }
     }
 
     /*void GetPathHome()

@@ -21,13 +21,13 @@ public class RawProduction : BaseProduction
     /// The terrain/s required for this building to perform.
     /// </summary>
     [Tooltip("The terrain/s required for this building to perform.")]
-    public List<TerrainMode> TerrainRequirement = new List<TerrainMode>();
+    public List<TerrainTypes> TerrainRequirement = new List<TerrainTypes>();
 
     /// <summary>
     /// The products that this building can create.
     /// </summary>
     [Tooltip("the products that this building can create.")]
-    public List<Products> OutputProduct = new List<Products>();
+    public Products OutputProduct;
 
     /// <summary>
     /// Storage For completed products
@@ -117,7 +117,7 @@ public class RawProduction : BaseProduction
 
             if (ProductionTimer >= ProductionTime)
             {
-                OutputStorage.Add(new StorageItem(OutputProduct[ProductionMode]));
+                OutputStorage.Add(new StorageItem(OutputProduct));
                 ProductionFinished();
                 ProductionTimer = 0;
                 inProduction = false;
@@ -140,7 +140,7 @@ public class RawProduction : BaseProduction
         // if any of them are the required terrain type for this mode of production.
         foreach(HexTile hex in BuildingArea)
         {
-            foreach(TerrainTypes terra in TerrainRequirement[ProductionMode].TerrainRequirment)
+            foreach(TerrainTypes terra in TerrainRequirement)
             {
                 if(hex.TerrainType == terra)
                 {
@@ -254,13 +254,10 @@ public class RawProductionEditor : BaseProductionEditor
             {
                 List<string> terrains = new List<string>();
                 // for each terrain requirement add it to a string to keep them together.
-                for(int j = 0; j < myRPTarget.TerrainRequirement[i].TerrainRequirment.Count; ++j)
-                {
-                    terrains.Add(myRPTarget.TerrainRequirement[i].TerrainRequirment[j].ToString());
-                }
+                
 
                 // print the terrains and the output based on that terrain.
-                EditorGUILayout.LabelField(terrains[0], "->\t" + myRPTarget.OutputProduct[i].ToString());
+               // EditorGUILayout.LabelField(terrains[0], "->\t" + myRPTarget.OutputProduct[i].ToString());
                 if(terrains.Count > 1)
                 {
                     for(int i2 = 1; i2 < terrains.Count; ++i2)

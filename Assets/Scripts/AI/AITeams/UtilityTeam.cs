@@ -44,7 +44,7 @@ public class UtilityTeam : BaseAITeam
         if (GlobalAttributes.Global.Buildings[(int)buildingToCreate] is RawProduction)
         {
             // work out which mode to use
-            StartCoroutine(FindSpaceForBuilding(buildingToCreate, ((RawProduction)GlobalAttributes.Global.Buildings[(int)buildingToCreate]).TerrainRequirement[0].TerrainRequirment[0]));
+            //StartCoroutine(FindSpaceForBuilding(buildingToCreate, ((RawProduction)GlobalAttributes.Global.Buildings[(int)buildingToCreate]).TerrainRequirement[0].TerrainRequirment[0]));
         }
         else
         {
@@ -83,13 +83,9 @@ public class UtilityTeam : BaseAITeam
                 }
                 else if (building is UnitProduction)
                 {
-                    for(int i = 0; i < ((UnitProduction)building).ProductionRequirements.Count; ++i)
+                    if (((UnitProduction)building).ProductionRequirements.Contains(product))
                     {
-                        if (((UnitProduction)building).ProductionRequirements[i].RequiredProducts.Contains(product))
-                        {
-                            ++CurrentNum;
-                            break;
-                        }
+                        ++CurrentNum;
                     }
                 }
             }
@@ -148,9 +144,14 @@ public class UtilityTeam : BaseAITeam
 
     #region Mine
 
-    float GetNumMines()
+    float GetNumMineGolds()
     {
-        return GetNumBuildings(Buildings.Mine);
+        return GetNumBuildings(Buildings.MineGold);
+    }
+
+    float GetNumMineIrons()
+    {
+        return GetNumBuildings(Buildings.MineGold);
     }
 
     float GetNumMineRequirements()
@@ -220,7 +221,7 @@ public class UtilityTeam : BaseAITeam
 
     float GetNumSawmills()
     {
-        return GetNumBuildings(Buildings.Mine);
+        return GetNumBuildings(Buildings.Sawmill);
     }
 
     float GetNumSawmillRequirements()
@@ -448,9 +449,14 @@ public class UtilityTeam : BaseAITeam
 
     #region Barracks
 
-    float GetNumBarracks()
+    float GetNumBarracksArcher()
     {
-        return GetNumBuildings(Buildings.Barracks);
+        return GetNumBuildings(Buildings.BarracksArcher);
+    }
+
+    float GetNumBarracksSoldier()
+    {
+        return GetNumBuildings(Buildings.BarracksSoldier);
     }
 
     float NumEnemyUnits()
@@ -533,7 +539,9 @@ public class UtilityTeam : BaseAITeam
         UtilityConsideration HaveTierTwoResources = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), HaveTeirTwoRequirments, 1, 1, 0, 1, 0);
         UtilityConsideration HaveTierThreeResources = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), HaveTeirThreeRequirments, 1, 1, 0, 1, 0);
         UtilityConsideration HaveTierFourResources = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), HaveTeirFourRequirments, 1, 1, 0, 1, 0);
-        
+        UtilityConsideration NumOfEnemyUnits = new UtilityConsideration(UtilityConsideration.CurveTypes.Log, new Vector2(0, 100), NumEnemyUnits, 1, 1, 0, 10, 1);
+        UtilityConsideration OurMilitary = new UtilityConsideration(UtilityConsideration.CurveTypes.Trigonometric, new Vector2(0, 100), OurMilitaryCount, -1.3f, 1, 0.25f, 4, 1);
+
         #region Teir 1
 
         // Farm
@@ -549,11 +557,19 @@ public class UtilityTeam : BaseAITeam
             NumberOfFisherys, NumberOfFisheryRequirments, NumberOfFoodBuildings, HaveTierOneResources);
         myEngine.Actions.Add(FisheryAction);
 
-        // Mine
-        UtilityConsideration NumberOfMines = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMines, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfMineRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> MineAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Mine], NumberOfMines, NumberOfMineRequirments, HaveTierOneResources);
-        myEngine.Actions.Add(MineAction);
+        // MineGold
+        UtilityConsideration NumberOfMineGolds = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMineGolds, -1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfMineGoldRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> MineGoldAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.MineGold], 
+            NumberOfMineGolds, NumberOfMineGoldRequirments, HaveTierOneResources);
+        myEngine.Actions.Add(MineGoldAction);
+
+        // MineIron
+        UtilityConsideration NumberOfMineIrons = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMineIrons, -1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfMineIronRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> MineIronAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.MineIron],
+            NumberOfMineIrons, NumberOfMineIronRequirments, HaveTierOneResources);
+        myEngine.Actions.Add(MineIronAction);
 
         // Orchard
         UtilityConsideration NumberOfOrchards = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumOrchards, -1, 1, 0, 1, 0);
@@ -691,15 +707,19 @@ public class UtilityTeam : BaseAITeam
 
         #endregion
 
-        #region Tier 4
+        #region Tier 4        
 
-        // Barracks
-        UtilityConsideration NumOfBarracks = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumBarracks, -1, 1, 0, 1, 1);
-        UtilityConsideration NumOfEnemyUnits = new UtilityConsideration(UtilityConsideration.CurveTypes.Log, new Vector2(0, 100), NumEnemyUnits, 1, 1, 0, 10, 1);
-        UtilityConsideration OurMilitary = new UtilityConsideration(UtilityConsideration.CurveTypes.Trigonometric, new Vector2(0, 100), OurMilitaryCount, -1.3f, 1, 0.25f, 4, 1);
-        UtilityAction<BaseBuilding> BarracksAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Barracks],
-            NumOfBarracks, NumOfEnemyUnits, OurMilitary, HaveTierFourResources);
-        myEngine.Actions.Add(BarracksAction);
+        // BarracksArcher
+        UtilityConsideration NumOfBarracksArchers = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumBarracksArcher, -1, 1, 0, 1, 1);
+        UtilityAction<BaseBuilding> BarracksArcherAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.BarracksArcher],
+            NumOfBarracksArchers, NumOfEnemyUnits, OurMilitary, HaveTierFourResources);
+        myEngine.Actions.Add(BarracksArcherAction);
+
+        // BarracksSoldier
+        UtilityConsideration NumOfBarracksSoldiers = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumBarracksSoldier, -1, 1, 0, 1, 1);
+        UtilityAction<BaseBuilding> BarracksSoldierAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.BarracksArcher],
+            NumOfBarracksSoldiers, NumOfEnemyUnits, OurMilitary, HaveTierFourResources);
+        myEngine.Actions.Add(BarracksSoldierAction);
 
         // Library
         UtilityConsideration NumLibrarys = new UtilityConsideration(UtilityConsideration.CurveTypes.Log, new Vector2(0, 10), GetNumLibrarys, 1, 2, 0.5f, 10, 1);
@@ -715,7 +735,7 @@ public class UtilityTeam : BaseAITeam
 
         // Workshop
         UtilityConsideration NumOfWorkshops = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumWorkshops, -1, 1, 0, 1, 1);
-        UtilityConsideration EnemyBuildingCount = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 50), GetEnemyBuildingsCount, 1, 1, 0, 1, 0);
+        UtilityConsideration EnemyBuildingCount = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 20), GetEnemyBuildingsCount, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> WorkshopAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Workshop], NumOfWorkshops, EnemyBuildingCount, HaveTierFourResources);
         myEngine.Actions.Add(WorkshopAction);
 

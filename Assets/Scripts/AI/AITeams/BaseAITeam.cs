@@ -228,12 +228,13 @@ public class BaseAITeam : MonoBehaviour
                 }
             }
 
+            IsPlacingBuilding = false;
+
             if (BuildingBaseTile != null)
             {
                 ConstructBuilding(building, BuildingBaseTile.hexTransform.RowColumn);
             }
 
-            IsPlacingBuilding = false;
         }
     }
 
@@ -276,12 +277,13 @@ public class BaseAITeam : MonoBehaviour
                 }
             }
 
+            IsPlacingBuilding = false;
+
             if (BuildingBaseTile != null)
             {
                 ConstructBuilding(building, BuildingBaseTile.hexTransform.RowColumn);
             }
 
-            IsPlacingBuilding = false;
         }
     }
 

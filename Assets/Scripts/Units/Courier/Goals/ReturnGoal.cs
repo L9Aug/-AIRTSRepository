@@ -6,6 +6,13 @@ using System;
 
 public class ReturnGoal : GOAPGoal
 {
+    BaseUnit unit;
+
+    public void Initialise(BaseUnit Unit)
+    {
+        unit = Unit;
+    }
+
     public override void SetupPrecons()
     {
         Preconditions = new List<GOAPState>

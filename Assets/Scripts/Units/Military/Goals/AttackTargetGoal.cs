@@ -8,6 +8,8 @@ public class AttackTargetGoal : GOAPGoal
 {
     GameEntity target;
 
+    new MilitaryUnit unit;
+
     public AttackTargetGoal()
     {
 
@@ -46,13 +48,27 @@ public class AttackTargetGoal : GOAPGoal
 
     public override void SetupUtility()
     {
-        UtilAction = new UtilityAction<GOAPGoal>(1, this, new UtilityConsideration());
-        UtilAction.Considerations[0].GetInput = GoalInput;
+        UtilAction = new UtilityAction<GOAPGoal>(1, this, new UtilityConsideration(), new UtilityConsideration());
+        UtilAction.Considerations[0].GetInput = Distance;
+        UtilAction.Considerations[1].GetInput = UnitTypes;
     }
 
-    float GoalInput()
+    float Distance()
     {
-        Debug.Log(this + " has not been implemented fully.");
-        return 1;
+        return unit.hexTransform.CalcHexManhattanDist(unit.Destination);
+    }
+
+    float UnitTypes()
+    {
+        if (unit.gameObject.name == "Infantry" || unit.gameObject.name == "Archer")
+        {
+            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Polynomial;
+        }
+        if(unit.gameObject.name == "Catapult")
+        {
+            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Trigonometric;
+        }
+
+        return 0.7f;
     }
 }

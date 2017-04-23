@@ -61,8 +61,8 @@ public class Builder : BaseUnit
 
     void Build()
     {
-        Debug.Log("Build has not beein implemented fully");
-        //assignedBuilding.Build;
+        Debug.Log("Build has not been implemented fully");
+        assignedBuilding.BuilderArrived();
     }
 
     private void setupStateMachine()
@@ -80,8 +80,8 @@ public class Builder : BaseUnit
 
         State build = new State("Constructing",
             new List<Transition>() { arriveAtSite },
-            null,
-            new List<Action>() { Build },
+            new List<Action> { Build },
+            new List<Action>() {  },
             null);
 
         returnHome = new State("Retuning Home",

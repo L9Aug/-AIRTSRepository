@@ -6,6 +6,12 @@ using System;
 
 public class ExploreGoal : GOAPGoal
 {
+    BaseUnit unit;
+
+    public void Initialise(BaseUnit Unit)
+    {
+        unit = Unit;
+    }
 
     public override void SetupPrecons()
     {
@@ -17,7 +23,14 @@ public class ExploreGoal : GOAPGoal
 
     public override void SetupUtility()
     {
-        throw new NotImplementedException();
+        UtilAction = new UtilityAction<GOAPGoal>(1, this, new UtilityConsideration());
+        UtilAction.Considerations[0].GetInput = GetHealth;
+    }
+
+    float GetHealth()
+    {
+        Debug.Log("First Utility Consideration not created");
+        return 0;
     }
 
     // Use this for initialization

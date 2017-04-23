@@ -19,6 +19,8 @@ public class MilitaryUnit : BaseUnit
     public GOAPAgent GOAP;
 
     public AttackTargetGoal attackGoal;
+    public AttackBuildingGoal buildingAttack;
+    public ExploreGoal explore;
 
     public void SetTarget(GameObject Target)
     {
@@ -48,6 +50,13 @@ public class MilitaryUnit : BaseUnit
         SMActive = false;
         GOAP.AvailableActions.AddRange(GetComponents<GOAPAction>());
         GOAP.util.Actions.Add(attackGoal.UtilAction);
+        GOAP.util.Actions.Add(buildingAttack.UtilAction);
+        GOAP.util.Actions.Add(explore.UtilAction);
+
+        foreach(UtilityAction<GOAPGoal> goal in GOAP.util.Actions)
+        {
+            goal.ObjectReference.Initialise(this);
+        }
     }
     
 

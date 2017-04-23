@@ -11,6 +11,12 @@ namespace GOAP
         public List<GOAPState> Preconditions;
         public UtilityAction<GOAPGoal> UtilAction;
 
+        public BaseUnit unit;
+
+        public virtual void Initialise(BaseUnit Unit)
+        {
+            unit = Unit;
+        }
 
         public GOAPGoal()
         {

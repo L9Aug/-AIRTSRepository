@@ -65,6 +65,8 @@ public class TeamManager : MonoBehaviour
                     team.StartingLocation = GetRandomMapLocation();
                 }
             }
+
+            team.isTeamActive = true;
         }
     }
 

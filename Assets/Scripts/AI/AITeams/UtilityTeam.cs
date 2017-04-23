@@ -9,22 +9,50 @@ using UnityEditor;
 public class UtilityTeam : BaseAITeam
 {
 
-    UtilityEngine<BaseBuilding> myEngine;// = new UtilityEngine<BaseBuilding>();
+    UtilityEngine<BaseBuilding> myEngine;
 
+    public override void BuildingDestroyed(BaseBuilding BuildingLost)
+    {
+        base.BuildingDestroyed(BuildingLost);
+        GetNextBuilding();
+    }
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         SetupUtitlityEngine();
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void ActiveUpdate()
     {
-        print(myEngine.RunUtilityEngine()[0].BuildingType);
+        base.ActiveUpdate();        
     }
 
-#region Utility Engine Functions
+    protected override void BegunConstruction()
+    {
+        base.BegunConstruction();
+        GetNextBuilding();
+    }
+
+    void GetNextBuilding()
+    {
+        Buildings buildingToCreate = myEngine.RunUtilityEngine()[0].BuildingType;
+        print(buildingToCreate + " " + TeamID);
+
+        if (GlobalAttributes.Global.Buildings[(int)buildingToCreate] is RawProduction)
+        {
+            // work out which mode to use
+            StartCoroutine(FindSpaceForBuilding(buildingToCreate, ((RawProduction)GlobalAttributes.Global.Buildings[(int)buildingToCreate]).TerrainRequirement[0].TerrainRequirment[0]));
+        }
+        else
+        {
+            StartCoroutine(FindSpaceForBuilding(buildingToCreate));
+        }
+    }
+
+    #region Utility Engine Functions
 
     float GetNumBuildings(params Buildings[] BuildingTypes)
     {
@@ -510,61 +538,60 @@ public class UtilityTeam : BaseAITeam
 
         // Farm
         UtilityConsideration NumberOfFarms = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumFarms, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfFarmRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetFarmRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> FarmAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Farm], NumberOfFarms, NumberOfFarmRequirements, HaveTierOneResources);
+        UtilityConsideration NumberOfFarmRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetFarmRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> FarmAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Farm], NumberOfFarms, NumberOfFarmRequirements, HaveTierOneResources);
         myEngine.Actions.Add(FarmAction);
 
         // Fishery
         UtilityConsideration NumberOfFisherys = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumFisherys, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfFisheryRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumFisheryRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> FisheryAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Fishery],
+        UtilityConsideration NumberOfFisheryRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumFisheryRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> FisheryAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Fishery],
             NumberOfFisherys, NumberOfFisheryRequirments, NumberOfFoodBuildings, HaveTierOneResources);
         myEngine.Actions.Add(FisheryAction);
 
         // Mine
         UtilityConsideration NumberOfMines = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMines, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfMineRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMineRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> MineAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Mine], NumberOfMines, NumberOfMineRequirments, HaveTierOneResources);
+        UtilityConsideration NumberOfMineRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> MineAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Mine], NumberOfMines, NumberOfMineRequirments, HaveTierOneResources);
         myEngine.Actions.Add(MineAction);
 
         // Orchard
         UtilityConsideration NumberOfOrchards = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumOrchards, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfOrchardRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumOrchardRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> OrchardAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Orchard],
-            NumberOfMines, NumberOfMineRequirments, NumberOfFoodBuildings, HaveTierOneResources);
+        UtilityConsideration NumberOfOrchardRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumOrchardRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> OrchardAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Orchard],
+            NumberOfOrchards, NumberOfOrchardRequirments, NumberOfFoodBuildings, HaveTierOneResources);
         myEngine.Actions.Add(OrchardAction);
 
         // Pasture
         UtilityConsideration NumberOfPastures = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumPastures, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfPastureRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumPastureRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> PastureAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Pasture], NumberOfOrchards, NumberOfPastureRequirments, HaveTierOneResources);
+        UtilityConsideration NumberOfPastureRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumPastureRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> PastureAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Pasture], NumberOfPastures, NumberOfPastureRequirments, HaveTierOneResources);
         myEngine.Actions.Add(PastureAction);
 
         // Plantation
         UtilityConsideration NumberOfPlantations = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumPlantations, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfPlantationRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumPlantationRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> PlantationAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Plantation], NumberOfPlantations, NumberOfPlantationRequirments, HaveTierOneResources);
+        UtilityConsideration NumberOfPlantationRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumPlantationRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> PlantationAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Plantation], NumberOfPlantations, NumberOfPlantationRequirments, HaveTierOneResources);
         myEngine.Actions.Add(PlantationAction);
 
         // Quarry
         UtilityConsideration NumberOfQuarrys = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumQuarrys, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfQuarryRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumQuarryRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> QuarryAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Quarry], NumberOfQuarrys, NumberOfQuarryRequirments, HaveTierOneResources);
+        UtilityConsideration NumberOfQuarryRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumQuarryRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> QuarryAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Quarry], NumberOfQuarrys, NumberOfQuarryRequirments, HaveTierOneResources);
         myEngine.Actions.Add(QuarryAction);
 
         // Sawmill
         UtilityConsideration NumberOfSawmills = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumSawmills, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfSawmillRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumSawmillRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> SawmillAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Sawmill], NumberOfSawmills, NumberOfSawmillRequirments, HaveTierOneResources);
+        UtilityConsideration NumberOfSawmillRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumSawmillRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> SawmillAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Sawmill], NumberOfSawmills, NumberOfSawmillRequirments, HaveTierOneResources);
         myEngine.Actions.Add(SawmillAction);
 
         // WaterWell
         UtilityConsideration NumberOfWaterWells = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumWaterWells, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfWaterWellRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumWaterWellRequirements, 1, 1, 0, 1, 0);
-        UtilityAction<BaseBuilding> WaterWellAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.WaterWell], 
+        UtilityConsideration NumberOfWaterWellRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumWaterWellRequirements, 1, 1, 0, 1, 0);
+        UtilityAction<BaseBuilding> WaterWellAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.WaterWell], 
             NumberOfWaterWells, NumberOfWaterWellRequirments, NumberOfFoodBuildings, HaveTierOneResources);
         myEngine.Actions.Add(WaterWellAction);
-
 
         #endregion
         
@@ -577,7 +604,7 @@ public class UtilityTeam : BaseAITeam
 
         // Carpenter
         UtilityConsideration NumberOfCarpenters = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumCarpenters, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfCarpenterRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetCarpenterRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfCarpenterRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetCarpenterRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> CarpenterAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Carpenter],
             NumberOfCarpenters, NumberOfCarpenterRequirements, HaveTierTwoResources);
 
@@ -585,24 +612,24 @@ public class UtilityTeam : BaseAITeam
 
         // House
         UtilityConsideration NeedHouseConsideration = new UtilityConsideration(UtilityConsideration.CurveTypes.Polynomial, new Vector2(0, 20), NeedHouse, -1, 1, 0, 4, 1);
-        UtilityAction<BaseBuilding> HouseAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.House], NeedHouseConsideration, HaveTierTwoResources);
+        UtilityAction<BaseBuilding> HouseAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.House], NeedHouseConsideration, HaveTierTwoResources);
         myEngine.Actions.Add(HouseAction);
 
         // Mill
         UtilityConsideration NumberOfMills = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMills, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfMillRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetMillRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfMillRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetMillRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> MillAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Mill], NumberOfMills, NumberOfMillRequirements, HaveTierTwoResources);
         myEngine.Actions.Add(MillAction);
 
         // Tailor
         UtilityConsideration NumberOfTailors = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumTailors, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfTailorRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetTailorRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfTailorRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetTailorRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> TailorAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Tailor], NumberOfTailors, NumberOfTailorRequirements, HaveTierTwoResources);
         myEngine.Actions.Add(TailorAction);
 
         // Tanner
         UtilityConsideration NumberOfTanners = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumTanners, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfTannerRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetTannerRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfTannerRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetTannerRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> TannerAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Tanner], NumberOfTanners, NumberOfTannerRequirements, HaveTierTwoResources);
         myEngine.Actions.Add(TannerAction);
 
@@ -617,20 +644,20 @@ public class UtilityTeam : BaseAITeam
 
         // Armoursmith
         UtilityConsideration NumberOfArmoursmiths = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumArmoursmiths, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfArmoursmithRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetArmoursmithRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfArmoursmithRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetArmoursmithRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> ArmoursmithAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Armoursmith],
             NumberOfArmoursmiths, NumberOfArmoursmithRequirements, HaveTierThreeResources);
 
         myEngine.Actions.Add(ArmoursmithAction);
 
         // Bakery
-        UtilityConsideration NumberOfBakerys = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumBakerys, -1, 1, 0, 1, 1);
+        UtilityConsideration NumberOfBakerys = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumBakerys, -1, 1, 0, 1, 1);
         UtilityAction<BaseBuilding> BakeryAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Bakery], NumberOfBakerys, HaveTierThreeResources);
         myEngine.Actions.Add(BakeryAction);
 
         // Fletcher
         UtilityConsideration NumberOfFletchers = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumFletchers, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfFletcherRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetFletcherRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfFletcherRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetFletcherRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> FletcherAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Fletcher],
             NumberOfFletchers, NumberOfFletcherRequirements, HaveTierThreeResources);
 
@@ -638,7 +665,7 @@ public class UtilityTeam : BaseAITeam
 
         // Typography
         UtilityConsideration NumberOfTypographys = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumTypographys, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfTypographyRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetTypographyRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfTypographyRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetTypographyRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> TypographyAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Typography],
             NumberOfTypographys, NumberOfTypographyRequirements, HaveTierThreeResources);
 
@@ -646,17 +673,17 @@ public class UtilityTeam : BaseAITeam
 
         // Villa
         UtilityConsideration NeedVillaConsideration = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 5), NeedVilla, -1, 1, 0, 1, 1);
-        UtilityAction<BaseBuilding> VillaAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Villa], NeedVillaConsideration, HaveTierThreeResources);
+        UtilityAction<BaseBuilding> VillaAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.Villa], NeedVillaConsideration, HaveTierThreeResources);
         myEngine.Actions.Add(VillaAction);
 
         // Warehouse
-        UtilityConsideration NeedWarehouse = new UtilityConsideration(UtilityConsideration.CurveTypes.Polynomial, new Vector2(0, 2000), CurrentStorageSpace, -1, 1, 0.25f, 4, 1);
+        UtilityConsideration NeedWarehouse = new UtilityConsideration(UtilityConsideration.CurveTypes.Polynomial, new Vector2(0, 100), CurrentStorageSpace, -1, 1, 0, 1, 1);
         UtilityAction<BaseBuilding> WarehouseAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Warehouse], NeedWarehouse, HaveTierThreeResources);
         myEngine.Actions.Add(WarehouseAction);
 
         // Weaponsmith
         UtilityConsideration NumberOfWeaponsmiths = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumWeaponsmiths, -1, 1, 0, 1, 1);
-        UtilityConsideration NumberOfWeaponsmithRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetWeaponsmithRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfWeaponsmithRequirements = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetWeaponsmithRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> WeaponsmithAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Weaponsmith],
             NumberOfWeaponsmiths, NumberOfWeaponsmithRequirements, HaveTierThreeResources);
 

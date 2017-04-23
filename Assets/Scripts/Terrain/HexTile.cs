@@ -67,15 +67,16 @@ public class HexTransform
 
     public bool validateOddQ()
     {
-        if (RowColumn.x >= 0 && RowColumn.x < MapGenerator.Map.GetLength(0) && RowColumn.y >= 0 && RowColumn.y < MapGenerator.Map.GetLength(1))
-        {
-            return true;
-        }
-        return false;
+        return validateOddQ(this);
     }
 
     public bool validateOddQ(HexTransform testCon)
     {
+        //X, Z + (X - (X & 1)) / 2
+
+        testCon.RowColumn.x = testCon.Position.x;
+        testCon.RowColumn.y = testCon.Position.z + (testCon.Position.x - ((int)testCon.Position.x & 1)) / 2;
+
         if (testCon.RowColumn.x >= 0 && testCon.RowColumn.x < MapGenerator.Map.GetLength(0) && testCon.RowColumn.y >= 0 && testCon.RowColumn.y < MapGenerator.Map.GetLength(1))
         {
             return true;
@@ -96,6 +97,20 @@ public class HexTile : MonoBehaviour
     
 	public AStarInfo<HexTile> ASI;
     public DijkstraInfo DI;
+
+    #endregion
+
+    #region Private
+
+    private Vector3[] HexCubeDirections =
+        {
+            new Vector3(1, 0, -1),
+            new Vector3(1, 0, 0),
+            new Vector3(0, 0, 1),
+            new Vector3(-1, 0, 1),
+            new Vector3(-1, 0, 0),
+            new Vector3(0, 0, -1)
+        };
 
     #endregion
 
@@ -163,9 +178,11 @@ public class HexTile : MonoBehaviour
     public List<HexTile> GetHexArea(HexTile Center, int Radius)
     {
         List<HexTile> ReturnList = new List<HexTile>();
-        List<HexTile> ClosedList = new List<HexTile>();
 
-        GetHexArea(Center, Radius, ref ReturnList, ref ClosedList);
+        for(int i = 1; i <= Radius; ++i)
+        {
+            ReturnList.AddRange(GetHexRing(Center, i));
+        }
 
         return ReturnList;
     }
@@ -180,6 +197,44 @@ public class HexTile : MonoBehaviour
         return GetHexArea(this, Radius);
     }
 
+    public List<HexTile> GetHexRing(int Radius)
+    {
+        return GetHexRing(this, Radius);
+    }
+
+    // algorithm obtained from Red Blobs Games' Hexagons blog: http://www.redblobgames.com/grids/hexagons/
+    public List<HexTile> GetHexRing(HexTile Center, int Radius)
+    {
+        // reduce the radius to match our numerical system.
+        Radius -= 1;
+
+        List<HexTile> RetList = new List<HexTile>();
+
+        if (Radius == 0)
+        {
+            RetList.Add(Center);
+            return RetList;
+        }
+
+        HexTransform CurrentLoc = new HexTransform(Center.hexTransform.Position);
+        CurrentLoc.Position += Radius * HexCubeDirections[4];
+
+        for (int i = 0; i < 6; ++i)
+        {
+            for (int j = 0; j < Radius; ++j)
+            {
+                if (CurrentLoc.validateOddQ())
+                {
+                    RetList.Add(MapGenerator.Map[(int)CurrentLoc.RowColumn.x, (int)CurrentLoc.RowColumn.y]);
+                }
+                CurrentLoc.Position += HexCubeDirections[i];
+            }
+        }
+
+        return RetList;
+    }
+
+    /*
     /// <summary>
     /// Returns a list of tiles that make up the specified hex ring.
     /// </summary>
@@ -221,6 +276,7 @@ public class HexTile : MonoBehaviour
 
         return ReturnList;
     }
+    */
 
     /// <summary>
     /// Set the colour of this tile.
@@ -240,6 +296,7 @@ public class HexTile : MonoBehaviour
 
     #region Private
 
+    /*
     /// <summary>
     /// Calculates the specified area.
     /// </summary>
@@ -265,6 +322,7 @@ public class HexTile : MonoBehaviour
         }
     }
 
+    
     /// <summary>
     /// Calcualtes a hex ring of the specified dimentions from a HexTransform.
     /// </summary>
@@ -296,7 +354,9 @@ public class HexTile : MonoBehaviour
             }
         }
     }
+       
 
+    
     /// <summary>
     /// Calcualtes a hex ring of the specified dimentions from a tile.
     /// </summary>
@@ -328,6 +388,7 @@ public class HexTile : MonoBehaviour
             }
         }
     }
+    */
 
     #endregion
 

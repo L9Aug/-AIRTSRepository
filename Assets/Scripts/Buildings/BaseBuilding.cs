@@ -81,6 +81,16 @@ public class BaseBuilding : GameEntity
     [HideInInspector]
     public float DestructionTimer = 0;
 
+    public delegate void ConstructionCallbackFunction();
+
+    public ConstructionCallbackFunction ConstructionCallback
+    {
+        set
+        {
+            ConstructionCallbacks.Add(value);
+        }
+    }
+
     #endregion
 
     #region Protected
@@ -95,6 +105,11 @@ public class BaseBuilding : GameEntity
     /// </summary>
     protected GameObject OperationalModelData;
 
+    #endregion
+
+    #region Private
+
+    private List<ConstructionCallbackFunction> ConstructionCallbacks = new List<ConstructionCallbackFunction>();
 
     #endregion
 
@@ -155,6 +170,10 @@ public class BaseBuilding : GameEntity
     {
         base.Start();
         OperationalModelData = transform.FindChild("ModelData").gameObject;
+        if (OperationalModelData.GetComponent<Renderer>() != null)
+        {
+            OperationalModelData.GetComponent<Renderer>().material.color = TeamManager.TM.Teams[TeamID].TeamColour;
+        }
         SetUpStateMachine();
     }
 
@@ -172,11 +191,22 @@ public class BaseBuilding : GameEntity
 
         // Here change the update the model to the actual building model rather than the construction model.
         OperationalModelData.SetActive(true);
+
+        if (ConstructionCallbacks.Count > 0)
+        {
+            for (int i = 0; i < ConstructionCallbacks.Count; ++i)
+            {
+                if (ConstructionCallbacks[i] != null)
+                {
+                    ConstructionCallbacks[i]();
+                }
+            }
+        }
     }
 
     protected virtual void BuildingDestroyed()
     {
-        TeamManager.TM.Teams[TeamID].BuildingsList.Remove(this);
+        TeamManager.TM.Teams[TeamID].BuildingDestroyed(this);
         VictoryController.VC.UpdateMilitary(TeamID);
 
         // Spawn Destroyed model.
@@ -244,7 +274,10 @@ public class BaseBuilding : GameEntity
         // Create appropriate 3D model for being under construction.
         ConstructionObject = (GameObject)Instantiate(Resources.Load("ConstructionBuildings/ConstructionBuilding0" + Size));
         ConstructionObject.transform.SetParent(transform, false);
-
+        if (ConstructionObject.GetComponent<Renderer>() != null)
+        {
+            ConstructionObject.GetComponent<Renderer>().material.color = TeamManager.TM.Teams[TeamID].TeamColour;
+        }
         // Hide the operational model data.
         OperationalModelData.SetActive(false);
 

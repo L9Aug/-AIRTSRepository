@@ -3,6 +3,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SM;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -11,13 +12,17 @@ using UnityEditor;
 public class BaseAITeam : MonoBehaviour
 {
 
-    #region Public Variables
+    #region Variables
+
+    #region Public
 
     /// <summary>
     /// The ID for this team.
     /// </summary>
     [Tooltip("The ID for this team")]
     public int TeamID = 0;
+
+    public Color TeamColour;
 
     /// <summary>
     /// The starting location for this team.
@@ -47,6 +52,16 @@ public class BaseAITeam : MonoBehaviour
     public int x;
     public int y;
     public Buildings TestSpawn;
+
+    public bool isTeamActive = false;
+
+    #endregion
+
+    #region Private
+
+    bool IsPlacingBuilding = false;
+
+    #endregion
 
     #endregion
 
@@ -135,11 +150,15 @@ public class BaseAITeam : MonoBehaviour
                     // Clear Connections.
                     ClearArea(BuildingsList[BuildingsList.Count - 1]);
 
+                    BuildingsList[BuildingsList.Count - 1].ConstructionCallback = ConstructionFinished;
+
+                    BegunConstruction();
+
                     return true;
                 }
                 else
                 {
-                    Debug.LogWarning("Insufficient space for building: " + building.ToString() + ". Team: " + TeamID);
+                    Debug.LogWarning("Insufficient space for building: " + building.ToString() + ". Team: " + TeamID + " Retrying...");                    
                 }
             }
             else
@@ -152,12 +171,133 @@ public class BaseAITeam : MonoBehaviour
             Debug.LogWarning("Tile is not part of the map. Team: " + TeamID);
         }
 
+        if (building != Buildings.TownHall)
+        {
+            BegunConstruction();
+        }
         return false;
+    }
+
+    public virtual void BuildingDestroyed(BaseBuilding BuildingLost)
+    {
+        BuildingsList.Remove(BuildingLost);
+    }
+
+    #endregion
+
+    #region Protected
+
+    protected virtual void ActiveUpdate() { }
+
+    protected virtual void ConstructionFinished() { }
+
+    protected virtual void BegunConstruction() { }
+
+    protected IEnumerator FindSpaceForBuilding(Buildings building)
+    {
+        if (!IsPlacingBuilding)
+        {
+            IsPlacingBuilding = true;
+
+            int buildingSize = GlobalAttributes.Global.Buildings[(int)building].Size;
+
+            BaseBuilding ourTownHall = BuildingsList.Find(x => x.BuildingType == Buildings.TownHall);
+
+            int currentSearchRadius = buildingSize + ourTownHall.Size + 1;
+            bool CannotFindTile = false;
+
+            HexTile BuildingBaseTile = null;
+
+            while ((BuildingBaseTile == null) && !CannotFindTile)
+            {
+                List<HexTile> possibleTiles = MapGenerator.Map[(int)ourTownHall.hexTransform.RowColumn.x, (int)ourTownHall.hexTransform.RowColumn.y].GetHexRing(currentSearchRadius);
+
+                for (int i = 0; i < possibleTiles.Count; ++i)
+                {
+                    yield return null;
+                    if (ValidateArea(possibleTiles[i].hexTransform.RowColumn, buildingSize))
+                    {
+                        BuildingBaseTile = possibleTiles[i];
+                    }
+                }
+
+                ++currentSearchRadius;
+                if (currentSearchRadius >= Vector2.Distance(Vector2.zero, new Vector2(MapGenerator.Map.GetLength(0), MapGenerator.Map.GetLength(1))))
+                {
+                    CannotFindTile = true;
+                }
+            }
+
+            if (BuildingBaseTile != null)
+            {
+                ConstructBuilding(building, BuildingBaseTile.hexTransform.RowColumn);
+            }
+
+            IsPlacingBuilding = false;
+        }
+    }
+
+    protected IEnumerator FindSpaceForBuilding(Buildings building, TerrainTypes requiredTerrain)
+    {
+        if (!IsPlacingBuilding)
+        {
+            IsPlacingBuilding = true;
+
+            int buildingSize = GlobalAttributes.Global.Buildings[(int)building].Size;
+
+            BaseBuilding ourTownHall = BuildingsList.Find(x => x.BuildingType == Buildings.TownHall);
+
+            int currentSearchRadius = buildingSize + ourTownHall.Size + 1;
+            bool CannotFindTile = false;
+
+            HexTile BuildingBaseTile = null;
+
+            while ((BuildingBaseTile == null) && !CannotFindTile)
+            {
+                List<HexTile> possibleTiles = MapGenerator.Map[(int)ourTownHall.hexTransform.RowColumn.x, (int)ourTownHall.hexTransform.RowColumn.y].GetHexRing(currentSearchRadius).FindAll(x => x.TerrainType == requiredTerrain);
+
+                for (int i = 0; i < possibleTiles.Count; ++i)
+                {
+                    yield return null;
+                    List<HexTile> leveltwoPossibleTiles = MapGenerator.Map[(int)possibleTiles[i].hexTransform.RowColumn.x, (int)possibleTiles[i].hexTransform.RowColumn.y].GetHexArea(buildingSize);
+                    for (int j = 0; j < leveltwoPossibleTiles.Count; ++j)
+                    {
+                        if (ValidateArea(leveltwoPossibleTiles[j].hexTransform.RowColumn, buildingSize))
+                        {
+                            BuildingBaseTile = leveltwoPossibleTiles[j];
+                        }
+                    }
+                }
+
+                ++currentSearchRadius;
+                if (currentSearchRadius >= Vector2.Distance(Vector2.zero, new Vector2(MapGenerator.Map.GetLength(0), MapGenerator.Map.GetLength(1))))
+                {
+                    CannotFindTile = true;
+                }
+            }
+
+            if (BuildingBaseTile != null)
+            {
+                ConstructBuilding(building, BuildingBaseTile.hexTransform.RowColumn);
+            }
+
+            IsPlacingBuilding = false;
+        }
+    }
+
+    protected virtual void Start()
+    {
+        SetupStateMachine();
     }
 
     #endregion
 
     #region Private
+
+    private void Update()
+    {
+        TeamStateMachine.SMUpdate();
+    }
 
     /// <summary>
     /// Sets an exclusion zone around the building.
@@ -166,10 +306,12 @@ public class BaseAITeam : MonoBehaviour
     private void SetExlusionZone(BaseBuilding Building)
     {
         Building.exclusionZone = MapGenerator.Map[(int)Building.hexTransform.RowColumn.x, (int)Building.hexTransform.RowColumn.y].GetHexRing(Building.Size + 1);
+        //float count = 0;
         foreach (HexTile h in Building.exclusionZone)
         {
             h.IsExlusionZone = true;
-            //h.SetColour(Color.yellow);
+            //h.SetColour(new Color(count, 0, 0));
+            //count += 0.1f;
         }
     }
 
@@ -183,7 +325,7 @@ public class BaseAITeam : MonoBehaviour
         Building.BuildingArea = MapGenerator.Map[(int)Building.hexTransform.RowColumn.x, (int)Building.hexTransform.RowColumn.y].GetHexArea(Building.Size);
         foreach (HexTile h in Building.BuildingArea)
         {
-            h.ClearConnections();
+            h.IsExlusionZone = true;
         }
     }
 
@@ -212,14 +354,18 @@ public class BaseAITeam : MonoBehaviour
     /// <returns>Returns true if there is enough space.</returns>
     private bool ValidateArea(Vector2 loc, int buildingSize)
     {
-        int AreaCount = MapGenerator.Map[(int)loc.x, (int)loc.y].GetHexArea(buildingSize).Count;
+        List<HexTile> BuildingArea = MapGenerator.Map[(int)loc.x, (int)loc.y].GetHexArea(buildingSize);
+        int AreaCount = BuildingArea.Count;
 
         //Hex Number equation 3n^2 + 3n + 1 from Wolfram Alpha : http://mathworld.wolfram.com/HexNumber.html
         int RequiredArea = (int)((3 * Mathf.Pow(buildingSize - 1, 2)) + (3 * (buildingSize - 1)) + 1);
 
         if (AreaCount >= RequiredArea)
         {
-            return true;
+            if ((BuildingArea.Find(x => x.TerrainType == TerrainTypes.Sea) == null) && (BuildingArea.Find(x => x.IsExlusionZone == true) == null))
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -259,7 +405,51 @@ public class BaseAITeam : MonoBehaviour
         return false;
     }
 
+    private bool IsTeamActive()
+    {
+        return isTeamActive;
+    }
+
+    private void SetupStateMachine()
+    {
+        // Conditions
+        Condition.BoolCondition IsTeamActiveCondition = new Condition.BoolCondition(IsTeamActive);
+        Condition.NotCondition IsTeamInActiveCondition = new Condition.NotCondition(IsTeamActiveCondition);
+
+        // Transitions
+        Transition ActivateTeam = new Transition("Activate Team", IsTeamActiveCondition);
+        Transition DeActivateTeam = new Transition("De-Activate Team", IsTeamInActiveCondition);
+
+        // Sates
+        State Active = new State("Active",
+            new List<Transition>() { DeActivateTeam },
+            null,
+            new List<Action>() { ActiveUpdate },
+            null);
+
+        State InActive = new State("InActive",
+            new List<Transition>() { ActivateTeam },
+            null,
+            null,
+            null);
+
+        // Transition Links
+        ActivateTeam.SetTargetState(Active);
+        DeActivateTeam.SetTargetState(InActive);
+
+        // Create Machine
+        TeamStateMachine = new StateMachine(null, InActive, Active);
+        TeamStateMachine.InitMachine();
+
+    }
+
     #endregion
+
+    #endregion
+
+    #region StateMachine
+
+    protected StateMachine TeamStateMachine;
 
     #endregion
 

@@ -24,6 +24,11 @@ public class VictoryController : MonoBehaviour
 
     List<int> RemainingTeams;
 
+    private void Start()
+    {
+        VC = this;
+    }
+
     public void InitialiseVictoryConditions(int numTeams)
     {
         EconomicScores = new List<int>();
@@ -108,7 +113,8 @@ public class VictoryController : MonoBehaviour
 
     void DisableTeam(int Team)
     {
-
+        TeamManager.TM.Teams[Team].isTeamActive = false;
+        // Destroy all units and buildings on the map.
     }
 
     void InitiateVictory(int Team, VictoryTypes VictoryMode)

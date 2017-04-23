@@ -4,9 +4,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 public class BaseProduction : BaseBuilding
 {
@@ -25,11 +22,7 @@ public class BaseProduction : BaseBuilding
 
     #region Public
 
-    public float ProductionTime;
-
-    public int CourierCount = 0;
-
-    public List<GameEntity> OnMapCouriers = new List<GameEntity>();
+    public float ProductionTime;    
 
     // used for testing victrory conditions
     public ProductionTypes ProductionType;
@@ -53,8 +46,6 @@ public class BaseProduction : BaseBuilding
     #endregion
 
     #region Protected
-
-
 
     #endregion
 
@@ -99,16 +90,17 @@ public class BaseProduction : BaseBuilding
 
     protected virtual void SendCourierForProductsFunc()
     {
-        // create calamata tickets for the products used to create for this building
+        // create kalamata tickets for the products used to create for this building
+        List<Products> requiredProducts = GetMissingProducts();
 
-        // create unit with tickets
-    }
+        if (requiredProducts.Count > 0)
+        {
+            List<KalamataTicket> Tickets = TeamManager.TM.Teams[TeamID].ReserveProducts(hexTransform, requiredProducts.ToArray());
 
-    protected virtual void SendCourierWithProductsFunc()
-    {
-        // find closest storage building with space
+            // create unit with tickets
 
-        // send courier with products
+
+        }
     }
 
     protected override void BeginOperational()
@@ -193,6 +185,24 @@ public class BaseProduction : BaseBuilding
 
     #region Private
 
+    private List<Products> GetMissingProducts()
+    {
+        List<Products> RetList = new List<Products>();
+
+        for(int i = 0; i < ProductionRequirements.Count; ++i)
+        {
+            int timesNeeded = ProductionRequirements.FindAll(x => x == ProductionRequirements[i]).Count;
+
+            int missing = (timesNeeded * 5) - ProductionStorage.FindAll(x => x == ProductionRequirements[i]).Count;
+            for(int j = 0; j < missing; ++j)
+            {
+                RetList.Add(ProductionRequirements[i]);
+            }
+        }
+
+        return RetList;
+    }
+
     #endregion
 
     #endregion
@@ -203,30 +213,3 @@ public class BaseProduction : BaseBuilding
 
     #endregion
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(BaseProduction))]
-[CanEditMultipleObjects]
-public class BaseProductionEditor : BaseBuildingEditor
-{
-
-    private BaseProduction myBPTarget;
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        myBPTarget = (BaseProduction)target;
-    }
-
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        if (UseCustomInpector)
-        {
-            EditorGUILayout.LabelField("Production Time:", myBPTarget.ProductionTimer.ToString("F2") + " / " + myBPTarget.ProductionTime.ToString());
-        }
-    }
-
-}
-#endif

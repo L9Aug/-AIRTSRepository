@@ -19,11 +19,13 @@ public class StorageBuilding : BaseBuilding
     [Tooltip("The number of products this building can store.")]
     public int Capacity;
 
-    /// <summary>
-    /// The items stored in this buildings.
-    /// </summary>
-    [HideInInspector]
-    public List<StorageItem> ItemsStored = new List<StorageItem>();
+    public int RemainingSpace
+    {
+        get
+        {
+            return Capacity - ItemsStored.Count;
+        }
+    }
 
     #endregion
 
@@ -51,16 +53,6 @@ public class StorageBuilding : BaseBuilding
             }
         }
         return returnList;
-    }
-
-    public override List<KalamataTicket> GetTicketForProducts(ref List<Products> products)
-    {
-        return GetTicketsForProducts(ItemsStored, ref products);
-    }
-
-    public override bool TestForProducts(params Products[] products)
-    {
-        return TestForProducts(ItemsStored, products);
     }
 
     #endregion

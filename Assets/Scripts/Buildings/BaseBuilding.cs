@@ -91,6 +91,12 @@ public class BaseBuilding : GameEntity
         }
     }
 
+    /// <summary>
+    /// The items stored in this buildings.
+    /// </summary>
+    [HideInInspector]
+    public List<StorageItem> ItemsStored = new List<StorageItem>();
+
     #endregion
 
     #region Protected
@@ -107,13 +113,15 @@ public class BaseBuilding : GameEntity
 
     protected int BuildingUnits = 0;
 
+    protected List<GameEntity> OnMapCouriers = new List<GameEntity>();
+
+    protected int CourierCount = 0;
+
     #endregion
 
     #region Private
 
     private List<ConstructionCallbackFunction> ConstructionCallbacks = new List<ConstructionCallbackFunction>();
-
-    private bool CanBuild = false;
 
     private int MerchantCount = 0;
 
@@ -162,19 +170,99 @@ public class BaseBuilding : GameEntity
 
     public virtual void BuildingUpdate() { }
 
-    public virtual List<KalamataTicket> GetTicketForProducts(ref List<Products> products)
+    public List<KalamataTicket> GetTicketForProducts(ref List<Products> products)
     {
-        return new List<KalamataTicket>();
+        List<KalamataTicket> tickets = new List<KalamataTicket>();
+
+        // only loop the usually larger list once.
+        foreach (StorageItem item in ItemsStored)
+        {
+            // if the item isn't reserved then continue tests on it.
+            if (!item.Reserved)
+            {
+                // this usuially being the smaller list gets looped more often.
+                foreach (Products product in products)
+                {
+                    // if the product is the one we want, create a ticket for it and remove it from the critea.
+                    if (product == item.Product)
+                    {
+                        KalamataTicket nTicket = new KalamataTicket(product, this, item.ReserveProduct());
+                        tickets.Add(nTicket);
+                        products.Remove(product);
+                        break;
+                    }
+                }
+            }
+            if (products.Count == 0) break;
+        }
+
+        return tickets;
     }
 
-    public virtual bool TestForProducts(params Products[] products)
+    public bool TestForProducts(params Products[] products)
     {
+        foreach (StorageItem item in ItemsStored)
+        {
+            if (!item.Reserved)
+            {
+                foreach (Products product in products)
+                {
+                    if (item.Product == product)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
     public virtual List<Products> DeliverProducts(params Products[] products)
     {
         return new List<Products>();
+    }
+
+    public List<Products> GetProductsFromStorage(params Products[] products)
+    {
+        List<Products> RetList = new List<Products>();
+
+        foreach (Products product in products)
+        {
+            if (TestForProducts(product))
+            {
+                StorageItem MyProduct = (ItemsStored.Find(x => x.Reserved == false && x.Product == product));
+                ItemsStored.Remove(MyProduct);
+                RetList.Add(MyProduct.Product);
+            }
+        }
+
+        return RetList;
+    }
+
+    public List<Products> EmptyStorage()
+    {
+        List<StorageItem> AvailableProducts = ItemsStored.FindAll(x => x.Reserved == false);
+
+        List<Products> RetList = new List<Products>();
+
+        for(int i = 0; i < AvailableProducts.Count; ++i)
+        {
+            RetList.Add(AvailableProducts[i].Product);
+        }
+
+        return RetList;
+    }
+
+    public int ProductCount(Products product)
+    {
+        return ItemsStored.FindAll(x => x.Reserved == false && x.Product == product).Count;
+    }
+
+    public Products RedeemKalamataTicket(KalamataTicket Ticket)
+    {
+        StorageItem myItem = ItemsStored.Find(x => x.ReserveID == Ticket.ReservationID);
+        ItemsStored.Remove(myItem);
+        return myItem.Product;
     }
 
     #endregion
@@ -237,54 +325,41 @@ public class BaseBuilding : GameEntity
         // maybe some smoke?
     }
 
-    protected virtual void BeginOperational()
-    {
-        
-    }   
+    protected virtual void BeginOperational() { }
 
-    protected List<KalamataTicket> GetTicketsForProducts(List<StorageItem> storage, ref List<Products> products)
-    {
-        List<KalamataTicket> tickets = new List<KalamataTicket>();
+    protected virtual void CourierReterned() { }
 
-        // only loop the usually larger list once.
-        foreach (StorageItem item in storage)
+    protected virtual bool SendCourierWithProductsFunc()
+    {
+        // find closest storage building with space
+        List<BaseBuilding> StorageBuildings = TeamManager.TM.Teams[TeamID].BuildingsList.FindAll(x => x is StorageBuilding);
+
+
+        if (StorageBuildings.Count > 0)
         {
-            // if the item isn't reserved then continue tests on it.
-            if (!item.Reserved)
-            {
-                // this usuially being the smaller list gets looped more often.
-                foreach (Products product in products)
-                {
-                    // if the product is the one we want, create a ticket for it and remove it from the critea.
-                    if (product == item.Product)
-                    {
-                        KalamataTicket nTicket = new KalamataTicket(product, this, item.ReserveProduct());
-                        tickets.Add(nTicket);
-                        products.Remove(product);
-                        break;
-                    }
-                }
-            }
-            if (products.Count == 0) break;
-        }
+            StorageBuilding storageBuildingToUse;
 
-        return tickets;
-    }
+            float dist = float.MaxValue;
 
-    protected bool TestForProducts(List<StorageItem> storage, params Products[] products)
-    {
-        foreach (StorageItem item in storage)
-        {
-            if (!item.Reserved)
+            for(int i = 0; i < StorageBuildings.Count; ++i)
             {
-                foreach (Products product in products)
+                float tempDist = Vector3.Distance(transform.position, StorageBuildings[i].transform.position);
+
+                if(tempDist < dist)
                 {
-                    if (item.Product == product)
+                    if(((StorageBuilding)StorageBuildings[i]).RemainingSpace > 5)
                     {
-                        return true;
-                    }
+                        storageBuildingToUse = (StorageBuilding)StorageBuildings[i];
+                    } 
                 }
+
             }
+
+            // send courier with products
+
+            //use on map couriers to track who has been sent.
+
+            return true;
         }
         return false;
     }
@@ -389,178 +464,3 @@ public class BaseBuilding : GameEntity
     #endregion
 
 }
-
-
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(BaseBuilding))]
-[CanEditMultipleObjects]
-public class BaseBuildingEditor : GameEntityEditor
-{
-    protected List<ProductNumbers> productCounts = new List<ProductNumbers>();
-
-    private BaseBuilding myBBTarget;
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        myBBTarget = (BaseBuilding)target;
-    }
-
-    protected class ProductNumbers
-    {
-        public int count;
-        public Products type;
-
-        public ProductNumbers(int Count, Products Type)
-        {
-            count = Count;
-            type = Type;
-        }
-
-        public void AddtoCount(int amount)
-        {
-            count += amount;
-        }
-    }
-
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        if (UseCustomInpector)
-        {
-            EditorGUILayout.LabelField("Building Type:", myBBTarget.BuildingType.ToString());
-
-            EditorGUILayout.LabelField("Building Tier:", myBBTarget.Tier.ToString());
-
-            EditorGUILayout.LabelField("Building Size:", myBBTarget.Size.ToString());
-
-            EditorGUILayout.LabelField("Construction Time:", myBBTarget.ConstructionTimer.ToString("F2") + " / " + myBBTarget.ConstructionTime.ToString());
-            
-            EditorGUILayout.LabelField("Production Mode:", myBBTarget.ProductionMode.ToString());
-        }
-    }
-
-    protected List<ProductNumbers> CalcProductCounts(List<StorageItem> list)
-    {
-        List<ProductNumbers> ReturnList = new List<ProductNumbers>();
-
-        // for each storage item check if it is already in our return list
-        // if it is then increase it corrosponding count, if it is not then add it to the list.
-        foreach (StorageItem SI in list)
-        {
-            if (DoesProdCountsContain(SI.Product, ReturnList))
-            {
-                int index = ReturnList.FindIndex(x => x.type == SI.Product);
-                ReturnList[index].AddtoCount(1);
-            }
-            else
-            {
-                ReturnList.Add(new ProductNumbers(1, SI.Product));
-            }
-        }
-        return ReturnList;
-    }
-
-    protected List<ProductNumbers> CalcProductCounts(List<Products> list)
-    {
-        List<ProductNumbers> ReturnList = new List<ProductNumbers>();
-
-        // for each product check if it is already in our return list
-        // if it is then increase it corrosponding count, if it is not then add it to the list.
-        foreach (Products product in list)
-        {
-            if (DoesProdCountsContain(product, ReturnList))
-            {
-                int index = ReturnList.FindIndex(x => x.type == product);
-                ReturnList[index].AddtoCount(1);
-            }
-            else
-            {
-                ReturnList.Add(new ProductNumbers(1, product));
-            }
-        }
-        return ReturnList;
-    }
-
-    protected bool DoesProdCountsContain(Products product, List<ProductNumbers> testList)
-    {
-        // test to see if the roduct is in the list passed in.
-        foreach (ProductNumbers PN in testList)
-        {
-            if (PN.type == product)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected void StorageInspector(string name, ref bool ShowStorage, List<Products> ItemList, ref int previousCount, ref bool previousShowStorage, ref List<ProductNumbers> list)
-    {
-        ShowStorage = EditorGUILayout.Foldout(ShowStorage, name + ItemList.Count.ToString());
-
-        if (ItemList.Count > 0 && ShowStorage)
-        {
-            // if either the number of objects has changed or if we have begun to show it then
-            // update the list of products.
-            if (previousCount != ItemList.Count || previousShowStorage != ShowStorage)
-            {
-                list.Clear();
-                list = CalcProductCounts(ItemList);
-            }
-
-            // for each product print it and the amount that there are for it.
-            foreach (ProductNumbers PN in list)
-            {
-                EditorGUILayout.LabelField(PN.count.ToString() + "x", PN.type.ToString());
-            }
-
-        }
-
-        previousCount = ItemList.Count;
-        previousShowStorage = ShowStorage;
-    }
-
-    protected void StorageInspector(string name, ref bool ShowStorage, List<int> ItemList, List<Products> ExpectedList)
-    {
-        ShowStorage = EditorGUILayout.Foldout(ShowStorage, name);
-
-        if(ItemList.Count > 0 && ShowStorage)
-        {
-            for(int  i =0; i < ExpectedList.Count; ++i)
-            {
-                EditorGUILayout.LabelField(ItemList[i].ToString() + 'x', ExpectedList[i].ToString());
-            }
-        }
-    }
-
-    protected void StorageInspector(string name, ref bool ShowStorage, List<StorageItem> ItemList, ref int previousCount, ref bool previousShowStorage)
-    {
-        ShowStorage = EditorGUILayout.Foldout(ShowStorage, name + ItemList.Count.ToString());
-
-        if (ItemList.Count > 0 && ShowStorage)
-        {
-            // if either the number of objects has changed or if we have begun to show it then
-            // update the list of products.
-            if (previousCount != ItemList.Count || previousShowStorage != ShowStorage)
-            {
-                productCounts.Clear();
-                productCounts = CalcProductCounts(ItemList);
-            }
-
-            // for each product print it and the amount that there are for it.
-            foreach (ProductNumbers PN in productCounts)
-            {
-                EditorGUILayout.LabelField(PN.count.ToString() + "x", PN.type.ToString());
-            }
-
-        }
-
-        previousCount = ItemList.Count;
-        previousShowStorage = ShowStorage;
-    }
-
-}
-#endif

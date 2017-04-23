@@ -42,6 +42,25 @@ public class GameEntity : MonoBehaviour
 
     #region Functions
 
+    #region Public
+    public void DealDamage(float damage)
+    {
+        Health -= damage;
+        if(Health <= 0)
+        {
+            Die();
+        }
+    }
+
+    /// <summary>
+    /// Do death things, then use base.Die()
+    /// </summary>
+    public virtual void Die()
+    {
+        Destroy(this.gameObject);
+    }
+    #endregion
+
     #region Protected
 
     protected virtual void Start()

@@ -11,6 +11,8 @@ public class MilitaryUnit : BaseUnit
     public float attackDuration;
     public float damage;
     public int attackRange;
+    public float attackTime;
+    float attackTimer = 0;
 
     public GameObject target;
 
@@ -32,12 +34,16 @@ public class MilitaryUnit : BaseUnit
             worldState.Add(new GOAPState("Target in Range", (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) < attackRange)));
             worldState.Add(new GOAPState("Target is Enemy", (target.GetComponent<GameEntity>().TeamID != TeamID)));
         }
-        if(target.GetType() == typeof(HexTile))
-        {
-
-        }
         worldState.Add(new GOAPState("Target is Tile", target.GetType() == typeof(HexTile)));
         return worldState;
+    }
+
+    void AttackTimer()
+    {
+        if(attackTimer > 0)
+        {
+            attackTimer -= Time.deltaTime;
+        }
     }
 
     void Start()

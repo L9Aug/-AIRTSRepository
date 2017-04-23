@@ -38,11 +38,23 @@ public class BaseProduction : BaseBuilding
 
     public bool inProduction = false;
 
+    /// <summary>
+    /// The products required for this building to function.
+    /// </summary>
+    [Tooltip("The products required for this building to function.")]
+    public List<Products> ProductionRequirements = new List<Products>();
+
+    /// <summary>
+    /// Storage for production resources.
+    /// </summary>
+    [HideInInspector]
+    public List<Products> ProductionStorage = new List<Products>();
+
     #endregion
 
     #region Protected
 
-    
+
 
     #endregion
 
@@ -63,6 +75,12 @@ public class BaseProduction : BaseBuilding
     public override void BuildingUpdate()
     {
         base.BuildingUpdate();
+    }
+
+    public override List<Products> DeliverProducts(params Products[] products)
+    {
+        ProductionStorage.AddRange(products);
+        return new List<Products>();
     }
 
     #endregion
@@ -164,6 +182,16 @@ public class BaseProduction : BaseBuilding
                 break;
         }
     }
+
+    protected override void ConstructionFinished()
+    {
+        base.ConstructionFinished();
+        CourierCount = BuildingUnits;
+    }
+
+    #endregion
+
+    #region Private
 
     #endregion
 

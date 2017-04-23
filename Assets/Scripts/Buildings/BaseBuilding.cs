@@ -172,9 +172,9 @@ public class BaseBuilding : GameEntity
         return false;
     }
 
-    public virtual void DeliverProducts(params Products[] products)
+    public virtual List<Products> DeliverProducts(params Products[] products)
     {
-
+        return new List<Products>();
     }
 
     #endregion
@@ -189,6 +189,14 @@ public class BaseBuilding : GameEntity
         if (OperationalModelData.GetComponent<Renderer>() != null)
         {
             OperationalModelData.GetComponent<Renderer>().material.color = TeamManager.TM.Teams[TeamID].TeamColour;
+        }
+        else
+        {
+            Renderer[] ModelData = OperationalModelData.GetComponentsInChildren<Renderer>();
+            for(int i = 0; i < ModelData.Length; ++i)
+            {
+                ModelData[i].material.color = TeamManager.TM.Teams[TeamID].TeamColour;
+            }
         }
         SetUpStateMachine();
     }

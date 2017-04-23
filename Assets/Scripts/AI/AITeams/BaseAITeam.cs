@@ -238,7 +238,7 @@ public class BaseAITeam : MonoBehaviour
         }
     }
 
-    protected IEnumerator FindSpaceForBuilding(Buildings building, TerrainTypes requiredTerrain)
+    protected IEnumerator FindSpaceForBuilding(Buildings building, List<TerrainTypes> requiredTerrain)
     {
         if (!IsPlacingBuilding)
         {
@@ -255,7 +255,7 @@ public class BaseAITeam : MonoBehaviour
 
             while ((BuildingBaseTile == null) && !CannotFindTile)
             {
-                List<HexTile> possibleTiles = MapGenerator.Map[(int)ourTownHall.hexTransform.RowColumn.x, (int)ourTownHall.hexTransform.RowColumn.y].GetHexRing(currentSearchRadius).FindAll(x => x.TerrainType == requiredTerrain);
+                List<HexTile> possibleTiles = MapGenerator.Map[(int)ourTownHall.hexTransform.RowColumn.x, (int)ourTownHall.hexTransform.RowColumn.y].GetHexRing(currentSearchRadius).FindAll(x => requiredTerrain.Contains(x.TerrainType));
 
                 for (int i = 0; i < possibleTiles.Count; ++i)
                 {

@@ -31,6 +31,11 @@ public class StorageBuilding : BaseBuilding
 
     #region Public
 
+    public override List<Products> DeliverProducts(params Products[] products)
+    {
+        return AddProduct(products);
+    }
+
     public List<Products> AddProduct(params Products[] products)
     {
         List<Products> returnList = new List<Products>();
@@ -77,36 +82,3 @@ public class StorageBuilding : BaseBuilding
     #endregion
 
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(StorageBuilding))]
-[CanEditMultipleObjects]
-public class StorageBuildingEditor : BaseBuildingEditor
-{
-    private StorageBuilding mySBTarget;
-    private static bool showSBStorage;
-    private int previousCount;
-    private bool previousShowSBStorage;
-
-    
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        mySBTarget = (StorageBuilding)target;
-    }
-
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        if (UseCustomInpector)
-        {
-            EditorGUILayout.LabelField("Capacity:", mySBTarget.Capacity.ToString());
-
-            StorageInspector("Stored Items: ", ref showSBStorage, mySBTarget.ItemsStored, ref previousCount, ref previousShowSBStorage);         
-        }
-    }
-
-}
-#endif

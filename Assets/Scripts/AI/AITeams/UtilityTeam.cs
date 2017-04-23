@@ -43,8 +43,7 @@ public class UtilityTeam : BaseAITeam
 
         if (GlobalAttributes.Global.Buildings[(int)buildingToCreate] is RawProduction)
         {
-            // work out which mode to use
-            //StartCoroutine(FindSpaceForBuilding(buildingToCreate, ((RawProduction)GlobalAttributes.Global.Buildings[(int)buildingToCreate]).TerrainRequirement[0].TerrainRequirment[0]));
+            StartCoroutine(FindSpaceForBuilding(buildingToCreate, ((RawProduction)GlobalAttributes.Global.Buildings[(int)buildingToCreate]).TerrainRequirement));
         }
         else
         {
@@ -151,12 +150,12 @@ public class UtilityTeam : BaseAITeam
 
     float GetNumMineIrons()
     {
-        return GetNumBuildings(Buildings.MineGold);
+        return GetNumBuildings(Buildings.MineIron);
     }
 
-    float GetNumMineRequirements()
+    float GetNumMineIronRequirements()
     {
-        return GetNumBuildingsReqs(Products.Iron, Products.Gold);
+        return GetNumBuildingsReqs(Products.Iron);
     }
 
     #endregion
@@ -541,6 +540,7 @@ public class UtilityTeam : BaseAITeam
         UtilityConsideration HaveTierFourResources = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), HaveTeirFourRequirments, 1, 1, 0, 1, 0);
         UtilityConsideration NumOfEnemyUnits = new UtilityConsideration(UtilityConsideration.CurveTypes.Log, new Vector2(0, 100), NumEnemyUnits, 1, 1, 0, 10, 1);
         UtilityConsideration OurMilitary = new UtilityConsideration(UtilityConsideration.CurveTypes.Trigonometric, new Vector2(0, 100), OurMilitaryCount, -1.3f, 1, 0.25f, 4, 1);
+        UtilityConsideration GoldAmount = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 50), GetGoldCount, -1, 1, 0, 1, 1);
 
         #region Teir 1
 
@@ -559,14 +559,13 @@ public class UtilityTeam : BaseAITeam
 
         // MineGold
         UtilityConsideration NumberOfMineGolds = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMineGolds, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfMineGoldRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> MineGoldAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.MineGold], 
-            NumberOfMineGolds, NumberOfMineGoldRequirments, HaveTierOneResources);
+            NumberOfMineGolds, GoldAmount, HaveTierOneResources);
         myEngine.Actions.Add(MineGoldAction);
 
         // MineIron
         UtilityConsideration NumberOfMineIrons = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMineIrons, -1, 1, 0, 1, 0);
-        UtilityConsideration NumberOfMineIronRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineRequirements, 1, 1, 0, 1, 0);
+        UtilityConsideration NumberOfMineIronRequirments = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 1), GetNumMineIronRequirements, 1, 1, 0, 1, 0);
         UtilityAction<BaseBuilding> MineIronAction = new UtilityAction<BaseBuilding>(2, GlobalAttributes.Global.Buildings[(int)Buildings.MineIron],
             NumberOfMineIrons, NumberOfMineIronRequirments, HaveTierOneResources);
         myEngine.Actions.Add(MineIronAction);
@@ -729,7 +728,6 @@ public class UtilityTeam : BaseAITeam
 
         // Market
         UtilityConsideration NumMarkets = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 10), GetNumMarkets, -1, 1, 0, 1, 1);
-        UtilityConsideration GoldAmount = new UtilityConsideration(UtilityConsideration.CurveTypes.Linear, new Vector2(0, 50), GetGoldCount, -1, 1, 0, 1, 1);
         UtilityAction<BaseBuilding> MarketAction = new UtilityAction<BaseBuilding>(1, GlobalAttributes.Global.Buildings[(int)Buildings.Market], NumMarkets, GoldAmount, HaveTierFourResources);
         myEngine.Actions.Add(MarketAction);
 

@@ -9,7 +9,7 @@ namespace GOAP
         public static GOAPController GC;
         public int MaxAgentsPerFrame = 30;
 
-        List<GOAPAgent> Agents;
+        List<GOAPAgent> Agents = new List<GOAPAgent>();
 
         public void EnqueueForPlanning(GOAPAgent agent)
         {
@@ -32,6 +32,7 @@ namespace GOAP
             {
                 agent.ActionPlan = agent.Planner.GetActionPlan(agent, agent.WorldState, agent.AvailableActions, agent.util.RunUtilityEngine()[0]);
             }
+            Agents.Clear();
         }
     }
 

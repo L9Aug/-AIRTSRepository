@@ -42,7 +42,7 @@ public class GlobalAttributes : MonoBehaviour
     /// List of all buildings prefabs.
     /// In order according to the Buildings enum.
     /// </summary>
-    [Tooltip("List of all building prefabs, in order according to the buildings enum.\nBuilding prefabs must be named acroding to the enum (Pascal case and no spaces)")]
+    [Tooltip("List of all building prefabs, in order according to the buildings enum.\nBuilding prefabs must be named according to the enum (Pascal case and no spaces)")]
     public List<BaseBuilding> Buildings = new List<BaseBuilding>();
 
     /// <summary>
@@ -50,6 +50,12 @@ public class GlobalAttributes : MonoBehaviour
     /// </summary>
     [Tooltip("List of meshes for buildings whilst they are under construction")]
     public List<GameObject> ConstructionBuildings = new List<GameObject>();
+
+    /// <summary>
+    /// List of all unit prefabs.
+    /// </summary>
+    [Tooltip("List of all unit prefabs")]
+    public List<BaseUnit> Units = new List<BaseUnit>();
 
     private void Start()
     {
@@ -71,6 +77,11 @@ public class GlobalAttributesEditor : Editor
         {
             SortBuildings(myTarget);
         }
+
+        if(GUILayout.Button("Sort Units List"))
+        {
+            SortUnits(myTarget);
+        }
     }
 
     void SortBuildings(GlobalAttributes GA)
@@ -84,5 +95,15 @@ public class GlobalAttributesEditor : Editor
         GA.Buildings.AddRange(tempList);
     }
 
+    void SortUnits(GlobalAttributes GA)
+    {
+        List<BaseUnit> tempList = new List<BaseUnit>();
+        for (int i = 0; i < GA.Units.Count; ++i)
+        {
+            tempList.Add(GA.Units.Find(x => x.name == ((Units)i).ToString()));
+        }
+        GA.Units.Clear();
+        GA.Units.AddRange(tempList);
+    }
 }
 #endif

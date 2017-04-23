@@ -73,6 +73,11 @@ public class GameEntity : MonoBehaviour
 
     }
 
+    protected float HeuristicFunc(HexTile from, HexTile to)
+    {
+        return from.hexTransform.CalcHexManhattanDist(to.hexTransform);
+    }
+
     #endregion
 
     #endregion

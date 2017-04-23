@@ -5,27 +5,16 @@ using System.Collections.Generic;
 
 public class ASImplementation<T>
 {
-    public delegate float Heuristic(AStarInfo<T> from, AStarInfo<T> to);
+    public delegate float Heuristic(T from, T to);
+    public delegate void PathReceive(List<AStarInfo<T>> path);
     public AStarInfo<T> start;
-    public AStarInfo<T> destination;
+    public AStarInfo<T> Destination;
     public List<AStarInfo<T>> open = new List<AStarInfo<T>>();
     public List<AStarInfo<T>> closed = new List<AStarInfo<T>>();
 
-    public enum ASStates { waitingForStart, waitingForEnd, processing, waitingForClear }
-    public ASStates state = ASStates.waitingForStart;
-
-    // Use this for initialization
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update() {
-
-    }
-
     public List<AStarInfo<T>> AStar(AStarInfo<T> start, AStarInfo<T> destination, Heuristic heuristic)
     {
+        Destination = destination;
         List<AStarInfo<T>> temp = new List<AStarInfo<T>>();
         bool destinationFound = false;
         bool noValidPath = false;
@@ -62,11 +51,53 @@ public class ASImplementation<T>
 
             temp.Reverse();
         }
-        state = ASStates.waitingForClear;
 
         return temp;
     }
 
+    public IEnumerator ASTAR(AStarInfo<T> start, AStarInfo<T> destination, Heuristic heuristic, PathReceive path)
+    {
+        List<AStarInfo<T>> temp = new List<AStarInfo<T>>();
+        bool destinationFound = false;
+        bool noValidPath = false;
+        open.Add(start);
+
+        AddConnectionsToOpen(start, heuristic);
+
+        while (!destinationFound && !noValidPath)
+        {
+            yield return null;
+            AStarInfo<T> current = GetLowestETC();
+            if (current != null && current != destination)
+            {
+                AddConnectionsToOpen(current, heuristic);
+            }
+            else if (current == destination)
+            {
+                destinationFound = true;
+            }
+            else
+            {
+                noValidPath = true;
+            }
+        }
+
+        if (destinationFound)
+        {
+            AStarInfo<T> tempDestination = destination;
+            while (tempDestination != start && tempDestination != null)
+            {
+                temp.Add(tempDestination);
+                //tempTile.SetColour(Color.magenta);
+                tempDestination = (AStarInfo<T>)tempDestination.root;
+            }
+
+            temp.Reverse();
+        }
+        if(path != null)
+        path(temp);
+        //return temp;
+    }
 
     public List<AStarInfo<T>> AStar(Heuristic heuristic)
     {
@@ -80,11 +111,11 @@ public class ASImplementation<T>
         while (!destinationFound && !noValidPath)
         {
             AStarInfo<T> T = GetLowestETC();
-            if (T != null && T != destination)
+            if (T != null && T != Destination)
             {
                 AddConnectionsToOpen(T, heuristic);
             }
-            else if (T == destination)
+            else if (T == Destination)
             {
                 destinationFound = true;
             }
@@ -96,7 +127,7 @@ public class ASImplementation<T>
 
         if (destinationFound)
         {
-            AStarInfo<T> tempTile = destination;
+            AStarInfo<T> tempTile = Destination;
             while (tempTile != start && tempTile != null)
             {
                 temp.Add(tempTile);
@@ -106,7 +137,6 @@ public class ASImplementation<T>
 
             temp.Reverse();
         }
-        state = ASStates.waitingForClear;
 
         return temp;
     }
@@ -147,14 +177,14 @@ public class ASImplementation<T>
                     {
                         open.Add(c);
                         c.costSoFar = obj.costSoFar + (c.cost / 2f) + (obj.cost / 2f);
-                        c.heuristic = heuristic(c, destination);
+                        c.heuristic = heuristic(c.current, Destination.current);
                         c.ETC = c.costSoFar + c.heuristic;
                         c.root = obj;
                     }
                     else if (c.costSoFar > obj.costSoFar + (c.cost / 2f) + (obj.cost / 2f))
                     {
                         c.costSoFar = obj.costSoFar + (c.cost / 2f) + (obj.cost / 2f);
-                        c.heuristic = heuristic(c, destination);
+                        c.heuristic = heuristic(c.current, Destination.current);
                         c.ETC = c.costSoFar + c.heuristic;
                         c.root = obj;
                         if (closed.Contains(c))

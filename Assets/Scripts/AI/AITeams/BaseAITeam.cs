@@ -141,9 +141,6 @@ public class BaseAITeam : MonoBehaviour
 
                     BuildingsList[BuildingsList.Count - 1].ConfigureBuilding(Location, TeamID);
 
-                    // Deduct resources.
-                    DeductResources(buildingTier);
-
                     // Set exlusion zone
                     SetExlusionZone(BuildingsList[BuildingsList.Count -1]);
 
@@ -151,6 +148,12 @@ public class BaseAITeam : MonoBehaviour
                     ClearArea(BuildingsList[BuildingsList.Count - 1]);
 
                     BuildingsList[BuildingsList.Count - 1].ConstructionCallback = ConstructionFinished;
+
+                    // Deduct resources.
+                    if (building != Buildings.TownHall)
+                    {
+                        DeductResources(buildingTier);
+                    }
 
                     BegunConstruction();
 
@@ -340,7 +343,13 @@ public class BaseAITeam : MonoBehaviour
         Gold -= tier;
         Population.CitizenCount -= tier;
         //Dispatch Builders
-
+        for (int i = 0; i < tier; ++i)
+        {
+            HexTile buildingEntranceTile = BuildingsList[0].EntanceTiles[Random.Range(0, BuildingsList[0].EntanceTiles.Count - 1)];
+            //HexTile buildingEntranceTile = MapGenerator.Map[(int)BuildingsList[0].hexTransform.RowColumn.x, (int)BuildingsList[0].hexTransform.RowColumn.y];
+            Population.Citizens.Add((BaseUnit)Instantiate(GlobalAttributes.Global.Units[(int)Units.Builder], buildingEntranceTile.transform.position, Quaternion.identity, transform));
+            Population.Citizens[Population.Citizens.Count - 1].GetComponent<Builder>().Initialise(BuildingsList[0], BuildingsList[BuildingsList.Count - 1], TeamID, Products.Gold, buildingEntranceTile);
+        }
         if (tier == 4)
         {
             Population.MerchantCount -= 1;

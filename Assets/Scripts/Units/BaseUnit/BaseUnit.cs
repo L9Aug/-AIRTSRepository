@@ -19,17 +19,18 @@ public class BaseUnit : GameEntity
     public State move;
     public List<AStarInfo<HexTile>> path;
 
-    public ASImplementation<HexTile> aStar;
+    public ASImplementation<HexTile> aStar = new ASImplementation<HexTile>();
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
-
+        base.Start();
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         if (SMActive)
         {
             unitStateMachine.SMUpdate();
@@ -38,14 +39,15 @@ public class BaseUnit : GameEntity
 
     public void Move()
     {
+
         if (path.Count > 0)
         {
             Vector3 temp = SteeringBehaviours.Arrive(this, path[0].current, 0.1f, 0.1f);
-            transform.Translate(temp);
+            transform.Translate(temp * Time.deltaTime);
 
             if (Vector3.Distance(transform.position, path[0].current.transform.position) < 0.2f)
             {
-                hexTransform.Position = path[0].current.hexTransform.Position;
+                hexTransform = path[0].current.hexTransform;
                 path.RemoveAt(0);
             }
         }

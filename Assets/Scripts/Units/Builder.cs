@@ -12,31 +12,42 @@ public class Builder : BaseUnit
     State moveToBuildingSite;
     State returnHome;
 
-    List<Products> inventory;
+    Products gold;
 
     BoolCondition positionCorrect = new BoolCondition();
 
-    AGreaterThanB buildTimeComplete = new AGreaterThanB();
-
-
-    
+    ALessThanB buildTimeComplete = new ALessThanB();
+   
+    public void Initialise (BaseBuilding home, BaseBuilding assign, int teamID, Products Gold, HexTile startTile)
+    {
+        TeamManager.TM.Teams[TeamID].Population.CitizenCount--;
+        homeBuilding = home;
+        assignedBuilding = assign;
+        TeamID = teamID;
+        gold = Gold;
+        hexTransform = startTile.hexTransform;
+    }
 
     // Use this for initialization
-    void Start ()
+    protected override void Start ()
     {
+        base.Start();
         setupStateMachine();
 	}
 
+    protected override void Update()
+    {
+        base.Update();
+    }
+
     void ReturnHome()
     {
-        // Add this to the building and the global count
-        // Remove from the map list
         Destroy(gameObject);
     }
 
-    public void AssignInventory(List<Products> giveItems)
+    public void GiveGold(Products giveItems)
     {
-        inventory = giveItems;
+        gold = giveItems;
     }
 
     public void AssignDestination(BaseBuilding dest)
@@ -46,17 +57,30 @@ public class Builder : BaseUnit
 
     void FindHome()
     {
-        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, HexTransform.CalcHexManhattanDist);
+        //StartCoroutine(aStar.ASTAR(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, HeuristicFunc, SendPath));
+        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, HeuristicFunc);
     }
+
+    void SendPath(List<AStarInfo<HexTile>> Path)
+    {
+        path = Path;
+    }
+
+    float HomeHeuristicCalc()
+    {
+        return hexTransform.CalcHexManhattanDist(homeBuilding.hexTransform);
+    }
+
+    
 
     void FindDestination()
     {
-        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, HexTransform.CalcHexManhattanDist);
+        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)assignedBuilding.hexTransform.RowColumn.x, (int)assignedBuilding.hexTransform.RowColumn.y].ASI, HeuristicFunc);
     }
 
     bool TestTiles()
     {
-        return hexTransform == assignedBuilding.hexTransform;
+        return hexTransform.RowColumn == assignedBuilding.hexTransform.RowColumn;
     }
 
     void Build()
@@ -65,12 +89,24 @@ public class Builder : BaseUnit
         assignedBuilding.BuilderArrived();
     }
 
+    float GetConstructionTime()
+    {
+        return assignedBuilding.ConstructionTimer;
+    }
+
+    float ReturnZero()
+    {
+        return 0;
+    }
+
     private void setupStateMachine()
     {
         positionCorrect.Condition = TestTiles;
+        buildTimeComplete.A = GetConstructionTime;
+        buildTimeComplete.B = ReturnZero;
 
-        Transition arriveAtSite = new Transition("Arrived At Site", positionCorrect, new List<Action>());
-        Transition buildingComplete = new Transition("Building Complete", buildTimeComplete, new List<Action>());
+        Transition arriveAtSite = new Transition("Arrived At Site", positionCorrect, new List<Action> { Build });
+        Transition buildingComplete = new Transition("Building Complete", buildTimeComplete, new List<Action>() { ReturnHome } );
 
         moveToBuildingSite = new State("Moving To building Site",
             new List<Transition>() { arriveAtSite },
@@ -79,14 +115,14 @@ public class Builder : BaseUnit
             null);
 
         State build = new State("Constructing",
-            new List<Transition>() { arriveAtSite },
-            new List<Action> { Build },
+            new List<Transition>() { buildingComplete },
+            new List<Action> {  },
             new List<Action>() {  },
             null);
 
         returnHome = new State("Retuning Home",
             new List<Transition>(),
-            new List<Action> { ReturnHome },
+            new List<Action> { },
             null,
             null);
 

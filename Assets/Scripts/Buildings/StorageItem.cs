@@ -5,7 +5,7 @@ public class StorageItem
 {
     public Products Product;
     public bool Reserved = false;
-    private float ReserveID = 0;
+    public float ReserveID = 0;
 
     public StorageItem(Products product)
     {

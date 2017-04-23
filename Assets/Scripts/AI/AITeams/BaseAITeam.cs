@@ -33,8 +33,18 @@ public class BaseAITeam : MonoBehaviour
     /// <summary>
     /// The amount of gold this team has.
     /// </summary>
-    [Tooltip("The amout of gold this team has.")]
-    public int Gold = 0;
+    public int Gold
+    {
+        get
+        {
+            int currentCount = 0;
+            for(int i = 0; i < BuildingsList.Count; ++i)
+            {
+                currentCount += BuildingsList[i].ProductCount(Products.Gold);
+            }
+            return currentCount;
+        }
+    }
 
     /// <summary>
     /// The population available to this team. (Not population already in buildings)
@@ -311,6 +321,7 @@ public class BaseAITeam : MonoBehaviour
     private void SetExlusionZone(BaseBuilding Building)
     {
         Building.exclusionZone = MapGenerator.Map[(int)Building.hexTransform.RowColumn.x, (int)Building.hexTransform.RowColumn.y].GetHexRing(Building.Size + 1);
+        Building.EntanceTiles.AddRange(Building.exclusionZone);
         //float count = 0;
         foreach (HexTile h in Building.exclusionZone)
         {
@@ -340,7 +351,28 @@ public class BaseAITeam : MonoBehaviour
     /// <param name="tier">The tier of the building being created.</param>
     private void DeductResources(int tier)
     {
-        Gold -= tier;
+
+        List<Products> GoldList = new List<Products>();
+
+        // find gold
+        for(int i = 0; i < tier; ++i)
+        {
+            for(int j = 0; j < BuildingsList.Count; ++j)
+            {
+                GoldList.AddRange(BuildingsList[j].GetProductsFromStorage(Products.Gold));                
+
+                if(GoldList.Count >= tier)
+                {
+                    break;
+                }
+            }
+
+            if (GoldList.Count >= tier)
+            {
+                break;
+            }
+        }
+
         Population.CitizenCount -= tier;
         //Dispatch Builders
         for (int i = 0; i < tier; ++i)
@@ -354,6 +386,7 @@ public class BaseAITeam : MonoBehaviour
         {
             Population.MerchantCount -= 1;
             //Dispatch Merchant.
+
         }
     }
 

@@ -25,12 +25,6 @@ public class GeneralProduction : BaseProduction
     [Tooltip("The product this building creates.")]
     public Products OutputProduct;
 
-    /// <summary>
-    /// Storage for completed products.
-    /// </summary>
-    [HideInInspector]
-    public List<StorageItem> OutputStorage = new List<StorageItem>();
-
     #endregion
 
     #endregion
@@ -38,16 +32,6 @@ public class GeneralProduction : BaseProduction
     #region Functions
 
     #region Public
-
-    public override List<KalamataTicket> GetTicketForProducts(ref List<Products> products)
-    {
-        return GetTicketsForProducts(OutputStorage, ref products);
-    }
-
-    public override bool TestForProducts(params Products[] products)
-    {
-        return TestForProducts(OutputStorage, products);
-    }
 
     #endregion
 
@@ -74,7 +58,7 @@ public class GeneralProduction : BaseProduction
 
             if (ProductionTimer >= ProductionTime)
             {
-                OutputStorage.Add(new StorageItem(OutputProduct));
+                ItemsStored.Add(new StorageItem(OutputProduct));
                 ProductionFinished();
                 ProductionTimer = 0;
                 inProduction = false;
@@ -106,7 +90,7 @@ public class GeneralProduction : BaseProduction
 
     private object TestOutputStorage()
     {
-        return (OutputStorage.Count >= 5) ? true : false;
+        return (ItemsStored.Count >= 5) ? true : false;
     }
 
     private object FutureProductsTest()

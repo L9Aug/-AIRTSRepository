@@ -3,10 +3,6 @@
 using UnityEngine;
 using System.Collections;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 public class Market : BaseBuilding
 {
 
@@ -25,7 +21,6 @@ public class Market : BaseBuilding
     #endregion
 
     #region Private
-
 
     #endregion
 
@@ -52,10 +47,28 @@ public class Market : BaseBuilding
         for(int i = 0; i < 4; ++i)
         {
             CumulativeTierAdd[i] += ((float)TierCounts[i] / (float)AmountOfTier[i]) * (Time.deltaTime / Period) * (float)AmountPerTier[i];
-            TeamManager.TM.Teams[TeamID].Gold += (int)CumulativeTierAdd[i];
-            CumulativeTierAdd[i] -= (int)CumulativeTierAdd[i];
+            //TeamManager.TM.Teams[TeamID].Gold += (int)CumulativeTierAdd[i];
+            if(CumulativeTierAdd[i] > 1)
+            {
+                for(int j = 0; j < (int)CumulativeTierAdd[i]; ++j)
+                {
+                    ItemsStored.Add(new StorageItem(Products.Gold));
+                }
+                CumulativeTierAdd[i] -= (int)CumulativeTierAdd[i];
+            }
         }
 
+        if(ItemsStored.Count > 5)
+        {
+            // attempt to send courier
+            if(CourierCount > 0)
+            {
+                if (SendCourierWithProductsFunc())
+                {
+                    --CourierCount;
+                }
+            }
+        }
     }
 
     #endregion
@@ -72,68 +85,19 @@ public class Market : BaseBuilding
         base.Update();
     }
 
+    protected override void ConstructionFinished()
+    {
+        base.ConstructionFinished();
+        CourierCount = Tier;
+    }
+
+    protected override void CourierReterned()
+    {
+        base.CourierReterned();
+        ++CourierCount;
+    }
+
     #endregion
 
     #endregion
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(Market))]
-[CanEditMultipleObjects]
-public class MarketEditor : BaseBuildingEditor
-{
-    private Market myMTarget;
-
-    static bool DisplayAmountPerTier;
-    static bool DisplayAmountOfTier;
-    static bool DisplayCumulativeTierAdd;
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        myMTarget = (Market)target;
-    }
-
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        if (UseCustomInpector)
-        {
-            EditorGUILayout.FloatField("Period", myMTarget.Period);
-
-            DisplayIntArray(myMTarget.AmountPerTier, ref DisplayAmountPerTier);
-
-            DisplayIntArray(myMTarget.AmountOfTier, ref DisplayAmountOfTier);
-
-            DisplayFloatArray(myMTarget.CumulativeTierAdd, ref DisplayCumulativeTierAdd);
-
-        }        
-    }
-
-    void DisplayIntArray(int[] intArray, ref bool ShouldShow)
-    {
-        ShouldShow = EditorGUILayout.Foldout(ShouldShow, intArray.ToString());
-        if (ShouldShow)
-        {
-            foreach (int item in intArray)
-            {
-                EditorGUILayout.IntField(item);
-            }
-        }
-    }
-
-    void DisplayFloatArray(float[] floatArray, ref bool ShouldShow)
-    {
-        ShouldShow = EditorGUILayout.Foldout(ShouldShow, floatArray.ToString());
-        if (ShouldShow)
-        {
-            foreach (float item in floatArray)
-            {
-                EditorGUILayout.FloatField(item);
-            }
-        }
-    }
-
-}
-#endif

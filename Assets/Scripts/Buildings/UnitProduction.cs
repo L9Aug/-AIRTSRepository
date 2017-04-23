@@ -21,39 +21,19 @@ public class UnitProduction : BaseProduction
     /// The products required for this building to function.
     /// </summary>
     [Tooltip("The Products required for this building to function.")]
-    public List<InputRequirements> ProductionRequirements = new List<InputRequirements>();
+    public List<Products> ProductionRequirements = new List<Products>();
 
     /// <summary>
     /// Storage for products that are using in production
     /// </summary>
     [HideInInspector]
-    public List<List<int>> ProductionStorage = new List<List<int>>();
+    public List<int> ProductionStorage = new List<int>();
 
     /// <summary>
     /// The unit/s that this building creates.
     /// </summary>
     [Tooltip("The unit/s that this building creates.")]
-    public List<UnitOutputClass> UnitOutput = new List<UnitOutputClass>();
-
-    #endregion
-
-    #endregion
-
-    #region Classes
-
-    #region Public
-
-    [System.Serializable]
-    public class UnitOutputClass
-    {
-        public List<Units> Units = new List<Units>();
-    }
-
-    [System.Serializable]
-    public class InputRequirements
-    {
-        public List<Products> RequiredProducts = new List<Products>();
-    }
+    public List<Units> UnitOutput = new List<Units>();
 
     #endregion
 
@@ -69,11 +49,7 @@ public class UnitProduction : BaseProduction
 
         for(int i = 0; i < ProductionRequirements.Count; ++i)
         {
-            ProductionStorage.Add(new List<int>());
-            for(int j = 0; j < ProductionRequirements[i].RequiredProducts.Count; ++j)
-            {
-                ProductionStorage[i].Add(1);
-            }
+            ProductionStorage.Add(1);
         }
 
         SetupDecisionTree();
@@ -93,9 +69,9 @@ public class UnitProduction : BaseProduction
 
             if (ProductionTimer >= ProductionTime)
             {
-                for (int i = 0; i < UnitOutput[ProductionMode].Units.Count; ++i)
+                for (int i = 0; i < UnitOutput.Count; ++i)
                 {
-                    print("New " + UnitOutput[ProductionMode].Units[i].ToString() + " for Team " + TeamID);
+                    print("New " + UnitOutput[i].ToString() + " for Team " + TeamID);
                     ProductionFinished();
                 }
                 ProductionTimer = 0;
@@ -116,9 +92,9 @@ public class UnitProduction : BaseProduction
     protected override void BeginProduction()
     {
         base.BeginProduction();
-        for(int i = 0; i < ProductionRequirements[ProductionMode].RequiredProducts.Count; ++i)
+        for(int i = 0; i < ProductionRequirements.Count; ++i)
         {
-            --ProductionStorage[ProductionMode][i];
+            --ProductionStorage[i];
         }
     }
 
@@ -130,9 +106,9 @@ public class UnitProduction : BaseProduction
     {
         bool haveProducts = true;
 
-        for(int i = 0; i < ProductionRequirements[ProductionMode].RequiredProducts.Count; ++i)
+        for(int i = 0; i < ProductionRequirements.Count; ++i)
         {
-            if(ProductionStorage[ProductionMode][i] == 0)
+            if(ProductionStorage[i] == 0)
             {
                 haveProducts = false;
                 break;
@@ -146,9 +122,9 @@ public class UnitProduction : BaseProduction
     {
         bool haveProducts = true;
 
-        for (int i = 0; i < ProductionRequirements[ProductionMode].RequiredProducts.Count; ++i)
+        for (int i = 0; i < ProductionRequirements.Count; ++i)
         {
-            if(ProductionStorage[ProductionMode][i] < 5)
+            if(ProductionStorage[i] < 5)
             {
                 haveProducts = false;
                 break;
@@ -160,7 +136,7 @@ public class UnitProduction : BaseProduction
 
     private object AreProductsOnMap()
     {
-        return TeamManager.TM.Teams[TeamID].FindProducts(ProductionRequirements[ProductionMode].RequiredProducts.ToArray());
+        return TeamManager.TM.Teams[TeamID].FindProducts(ProductionRequirements.ToArray());
     }
 
     private object HaveISentACourier()
@@ -242,9 +218,10 @@ public class UnitProductionEditor : BaseProductionEditor
     void UnitInspector()
     {
         showUnitReqs = EditorGUILayout.Foldout(showUnitReqs, "Unit Requirements:");
-
+        /*
         if (showUnitReqs)
         {
+            
             for (int i = 0; i < myUPTarget.ProductionRequirements.Count; ++i)
             {
                 List<ProductNumbers> inputs = new List<ProductNumbers>();
@@ -291,6 +268,7 @@ public class UnitProductionEditor : BaseProductionEditor
 
             }
         }
+        */
 
     }
 }

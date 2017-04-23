@@ -22,7 +22,7 @@ public enum Units { Soldier, Archer, Catapult, Builder, Courier, Merchant, Citiz
 /// <summary>
 /// The available buildings in the game.
 /// </summary>
-public enum Buildings { TownHall, Farm, Fishery, Mine, Orchard, Pasture, Plantation, Quarry, Sawmill, WaterWell, Butcher, Carpenter, House, Mill, Tailor, Tanner, Winery, Armoursmith, Bakery, Fletcher, Typography, Villa, Warehouse, Weaponsmith, Barracks, Library, Market, Workshop }
+public enum Buildings { TownHall, Farm, Fishery, MineGold, MineIron, Orchard, Pasture, Plantation, Quarry, Sawmill, WaterWell, Butcher, Carpenter, House, Mill, Tailor, Tanner, Winery, Armoursmith, Bakery, Fletcher, Typography, Villa, Warehouse, Weaponsmith, BarracksArcher, BarracksSoldier, Library, Market, Workshop }
 
 /// <summary>
 /// The available terrain types in the game.

@@ -105,11 +105,17 @@ public class BaseBuilding : GameEntity
     /// </summary>
     protected GameObject OperationalModelData;
 
+    protected int BuildingUnits = 0;
+
     #endregion
 
     #region Private
 
     private List<ConstructionCallbackFunction> ConstructionCallbacks = new List<ConstructionCallbackFunction>();
+
+    private bool CanBuild = false;
+
+    private int MerchantCount = 0;
 
     #endregion
 
@@ -126,6 +132,16 @@ public class BaseBuilding : GameEntity
     #region Functions
 
     #region Public
+
+    public void BuilderArrived()
+    {
+        ++BuildingUnits;
+    }
+
+    public void MerchantArrived()
+    {
+        ++MerchantCount;
+    }
 
     public void ConfigureBuilding(int Q, int R, int teamID)
     {
@@ -286,7 +302,10 @@ public class BaseBuilding : GameEntity
 
     private void ConstructionUpdate()
     {
-        ConstructionTimer -= Time.deltaTime;
+        if (BuildingUnits == Tier && (Tier == 4 ? MerchantCount == 1 : true))
+        {
+            ConstructionTimer -= Time.deltaTime;
+        }
     }
 
     private void DestructionUpdate()
@@ -468,22 +487,6 @@ public class BaseBuildingEditor : GameEntityEditor
             }
         }
         return false;
-    }
-
-    protected void StorageInspector(string name, ref bool ShowStorage, List<List<int>> ItemList, List<UnitProduction.InputRequirements> ExpectedList)
-    {
-        ShowStorage = EditorGUILayout.Foldout(ShowStorage, name);
-
-        if (ShowStorage)
-        {
-            for(int i = 0; i < ExpectedList.Count; ++i)
-            {
-                for(int j = 0; j < ExpectedList[i].RequiredProducts.Count; ++j)
-                {
-                    EditorGUILayout.LabelField(ItemList[i][j].ToString() + 'x', ExpectedList[i].RequiredProducts[j].ToString());
-                }
-            }
-        }
     }
 
     protected void StorageInspector(string name, ref bool ShowStorage, List<Products> ItemList, ref int previousCount, ref bool previousShowStorage, ref List<ProductNumbers> list)

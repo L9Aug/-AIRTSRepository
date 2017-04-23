@@ -29,11 +29,8 @@ public class MilitaryUnit : BaseUnit
     {
         List<GOAPState> worldState = new List<GOAPState>();
         worldState.Add(new GOAPState("Has Target", (target != null)));
-        if (target.GetType() == typeof(GameEntity))
-        {
-            worldState.Add(new GOAPState("Target in Range", (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) < attackRange)));
-            worldState.Add(new GOAPState("Target is Enemy", (target.GetComponent<GameEntity>().TeamID != TeamID)));
-        }
+        worldState.Add(new GOAPState("Target in Range", (target.GetType() == typeof(GameEntity)) ? (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) < attackRange) : false));
+        worldState.Add(new GOAPState("Target is Enemy", (target.GetType() == typeof(GameEntity)) ? (target.GetComponent<GameEntity>().TeamID != TeamID) : false));
         worldState.Add(new GOAPState("Target is Tile", target.GetType() == typeof(HexTile)));
         return worldState;
     }

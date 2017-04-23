@@ -9,9 +9,9 @@ namespace GOAP
         //public bool isSatisfied = false;
         //public List<GOAPState> PreConditions;
         public string Name;
-        public List<bool> Items;
+        public List<object> Items;
 
-        public void Initialise(string name, List<bool> items)
+        public void Initialise(string name, List<object> items)
         {
             Name = name;
             Items = items;
@@ -22,7 +22,7 @@ namespace GOAP
 
         }
 
-        public GOAPState(string name, params bool[] items)
+        public GOAPState(string name, params object[] items)
         {
             Name = name;
 
@@ -47,7 +47,12 @@ namespace GOAP
                     listEq = false;
                     break;
                 }
-                if(Items[i] != obj.Items[i])
+                if(!ReferenceEquals(Items[i].GetType(), obj.Items[i].GetType()))
+                {
+                    listEq = false;
+                    break;
+                }
+                if(!Items[i].Equals(obj.Items[i]))
                 {
                     listEq = false;
                     break;

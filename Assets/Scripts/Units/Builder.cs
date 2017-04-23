@@ -12,9 +12,14 @@ public class Builder : BaseUnit
     State moveToBuildingSite;
     State returnHome;
 
+    List<Products> inventory;
+
     BoolCondition positionCorrect = new BoolCondition();
 
     AGreaterThanB buildTimeComplete = new AGreaterThanB();
+
+
+    
 
     // Use this for initialization
     void Start ()
@@ -29,19 +34,35 @@ public class Builder : BaseUnit
         Destroy(gameObject);
     }
 
+    public void AssignInventory(List<Products> giveItems)
+    {
+        inventory = giveItems;
+    }
+
+    public void AssignDestination(BaseBuilding dest)
+    {
+        assignedBuilding = dest;
+    }
+
     void FindHome()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, HexTransform.CalcHexManhattanDist);
     }
 
-    void Build()
+    void FindDestination()
     {
-
+        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)homeBuilding.hexTransform.RowColumn.x, (int)homeBuilding.hexTransform.RowColumn.y].ASI, HexTransform.CalcHexManhattanDist);
     }
 
     bool TestTiles()
     {
         return hexTransform == assignedBuilding.hexTransform;
+    }
+
+    void Build()
+    {
+        Debug.Log("Build has not beein implemented fully");
+        //assignedBuilding.Build;
     }
 
     private void setupStateMachine()
@@ -53,7 +74,7 @@ public class Builder : BaseUnit
 
         moveToBuildingSite = new State("Moving To building Site",
             new List<Transition>() { arriveAtSite },
-            null,
+            new List<Action> { FindDestination },
             new List<Action>() { Move },
             null);
 
@@ -65,7 +86,7 @@ public class Builder : BaseUnit
 
         returnHome = new State("Retuning Home",
             new List<Transition>(),
-            null,
+            new List<Action> { ReturnHome },
             null,
             null);
 

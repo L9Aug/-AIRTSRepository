@@ -23,7 +23,7 @@ public class ReturnGoal : GOAPGoal
 
     float ReadyToFinish()
     {
-        if (Preconditions[0].Items[0])
+        if (Preconditions[0].Items[0].Equals(true))
             return 1;
         else
             return 0;

@@ -6,26 +6,57 @@ using System;
 
 public class AttackBuildingGoal : GOAPGoal
 {
-    BaseUnit unit;
+    new MilitaryUnit unit;
 
-    public void Initialise(BaseUnit Unit)
+    public new void Initialise(BaseUnit Unit)
     {
-        unit = Unit;
+        unit = (MilitaryUnit)Unit;
     }
 
     public override void SetupPrecons()
     {
-        throw new NotImplementedException();
+        Preconditions = new List<GOAPState>
+        {
+            new GOAPState("Has Target", true),
+            new GOAPState("Target in Range", true)
+        };
     }
 
     public override void SetupUtility()
     {
-        throw new NotImplementedException();
+        UtilAction = new UtilityAction<GOAPGoal>(1, this, new UtilityConsideration(), new UtilityConsideration());
+        UtilAction.Considerations[0].GetInput = Distance;
+        if (unit.gameObject.name == "Infantry" || unit.gameObject.name == "Archer")
+        {
+            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Trigonometric;
+        }
+        if (unit.gameObject.name == "Catapult")
+        {
+            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Polynomial;
+        }
+        UtilAction.Considerations[1].GetInput = UnitTypes;
+        UtilAction.Considerations[1].m = 0.3f;
+        UtilAction.Considerations[1].d = -0.7f;
+        UtilAction.Considerations[1].k = 1.4f;
+        UtilAction.Considerations[1].p = 0.4f;
+        UtilAction.Considerations[1].c = -0.1f;
+    }
+
+    float Distance()
+    {
+        return unit.hexTransform.CalcHexManhattanDist(unit.Destination);
+    }
+
+    float UnitTypes()
+    {
+        return 0.9f;
     }
 
     // Use this for initialization
-    void Start () {
-		
+    void Start ()
+    {
+        SetupPrecons();
+        SetupUtility();
 	}
 	
 	// Update is called once per frame

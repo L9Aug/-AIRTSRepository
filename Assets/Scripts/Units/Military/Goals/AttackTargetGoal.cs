@@ -10,14 +10,23 @@ public class AttackTargetGoal : GOAPGoal
 
     new MilitaryUnit unit;
 
+    public override void Initialise(BaseUnit Unit)
+    {
+        unit = (MilitaryUnit)Unit;
+    }
+
     public AttackTargetGoal()
     {
 
     }
 
-    public void SetupPreconditions()
+    public override void SetupPrecons()
     {
-
+        Preconditions = new List<GOAPState>
+        {
+            new GOAPState("Target is Enemy", true),
+            new GOAPState("Target in Range", true)
+        };
     }
 
     public void SetTarget(GameEntity Target)
@@ -25,32 +34,32 @@ public class AttackTargetGoal : GOAPGoal
         target = Target;
     }
 
-
 	// Use this for initialization
 	void Start ()
     {
         Name = "Attack Target";
-        SetupPreconditions();
+        SetupPrecons();
         SetupUtility();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
-    public override void SetupPrecons()
-    {
-
-        Preconditions.Add(new GOAPState("Has Target", true));
-        Preconditions.Add(new GOAPState("Target in Range", true));
-    }
 
     public override void SetupUtility()
     {
         UtilAction = new UtilityAction<GOAPGoal>(1, this, new UtilityConsideration(), new UtilityConsideration());
         UtilAction.Considerations[0].GetInput = Distance;
+        if (unit.gameObject.name == "Infantry" || unit.gameObject.name == "Archer")
+        {
+            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Polynomial;
+        }
+        if (unit.gameObject.name == "Catapult")
+        {
+            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Trigonometric;
+        }
         UtilAction.Considerations[1].GetInput = UnitTypes;
+        UtilAction.Considerations[1].m = 0.3f;
+        UtilAction.Considerations[1].d = -0.7f;
+        UtilAction.Considerations[1].k = 1.4f;
+        UtilAction.Considerations[1].p = 0.4f;
+        UtilAction.Considerations[1].c = -0.1f;
     }
 
     float Distance()
@@ -60,15 +69,6 @@ public class AttackTargetGoal : GOAPGoal
 
     float UnitTypes()
     {
-        if (unit.gameObject.name == "Infantry" || unit.gameObject.name == "Archer")
-        {
-            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Polynomial;
-        }
-        if(unit.gameObject.name == "Catapult")
-        {
-            UtilAction.Considerations[1].CurveType = UtilityConsideration.CurveTypes.Trigonometric;
-        }
-
-        return 0.7f;
+        return 0.9f;
     }
 }

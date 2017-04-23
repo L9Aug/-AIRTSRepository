@@ -65,7 +65,7 @@ public class GameEntity : MonoBehaviour
 
     protected virtual void Start()
     {
-
+        Health = MaxHealth;
     }
 
     protected virtual void Update()

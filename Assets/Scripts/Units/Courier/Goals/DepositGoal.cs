@@ -9,7 +9,15 @@ public class DepositGoal : GOAPGoal
     int maxInventory;
     int inventoryCount;
     BaseBuilding targetBuilding;
-    BaseUnit actingUnit;
+    new Courier unit;
+
+    
+
+    void Start()
+    {
+        targetBuilding = unit.DestinationBuilding;
+    }
+
 
     public override void SetupPrecons()
     {
@@ -23,6 +31,8 @@ public class DepositGoal : GOAPGoal
     {
         UtilAction = new UtilityAction<GOAPGoal>(1, this, new UtilityConsideration(), new UtilityConsideration(), new UtilityConsideration());
         UtilAction.Considerations[0].GetInput = SendInventoryCount;
+        UtilAction.Considerations[0].p = 3;
+        UtilAction.Considerations[0].k = 0.2f;
         UtilAction.Considerations[1].GetInput = InventoryAtMax;
         UtilAction.Considerations[2].GetInput = DistanceToTarget;
     }
@@ -30,7 +40,6 @@ public class DepositGoal : GOAPGoal
     public void SetUp(int InventorySize, BaseBuilding target, BaseUnit unit)
     {
         targetBuilding = target;
-        actingUnit = unit;
         maxInventory = InventorySize;
     }
 
@@ -38,15 +47,10 @@ public class DepositGoal : GOAPGoal
     {
         targetBuilding = target;
     }
-
-    public void UpdateInventory(int invCount) 
-    {
-        inventoryCount = invCount;
-    }
     
     float SendInventoryCount()
     {
-        return inventoryCount;
+        return unit.inventory.Count / unit.inventorySpace;
     }
 
     float InventoryAtMax()
@@ -59,7 +63,7 @@ public class DepositGoal : GOAPGoal
 
     float DistanceToTarget()
     {
-        return (float)HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)actingUnit.hexTransform.RowColumn.x, (int)actingUnit.hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)targetBuilding.hexTransform.RowColumn.x, (int)targetBuilding.hexTransform.RowColumn.y].ASI);
+        return (float)HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)unit.hexTransform.RowColumn.x, (int)unit.hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)targetBuilding.hexTransform.RowColumn.x, (int)targetBuilding.hexTransform.RowColumn.y].ASI);
     }
 
 }

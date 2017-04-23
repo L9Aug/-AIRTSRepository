@@ -36,7 +36,7 @@ public class DepositProduct : TargetedAction
 
     void DepositProducts()
     {
-        target.DeliverProducts(unit.inventory.ToArray());
+        unit.inventory = target.DeliverProducts(unit.inventory.ToArray());
     }
 
     public void SetTarget(BaseBuilding Target)

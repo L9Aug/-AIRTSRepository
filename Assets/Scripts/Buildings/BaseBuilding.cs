@@ -190,6 +190,14 @@ public class BaseBuilding : GameEntity
         {
             OperationalModelData.GetComponent<Renderer>().material.color = TeamManager.TM.Teams[TeamID].TeamColour;
         }
+        else
+        {
+            Renderer[] ModelData = OperationalModelData.GetComponentsInChildren<Renderer>();
+            for(int i = 0; i < ModelData.Length; ++i)
+            {
+                ModelData[i].material.color = TeamManager.TM.Teams[TeamID].TeamColour;
+            }
+        }
         SetUpStateMachine();
     }
 

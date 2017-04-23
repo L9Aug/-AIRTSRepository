@@ -172,9 +172,9 @@ public class BaseBuilding : GameEntity
         return false;
     }
 
-    public virtual void DeliverProducts(params Products[] products)
+    public virtual List<Products> DeliverProducts(params Products[] products)
     {
-
+        return new List<Products>();
     }
 
     #endregion

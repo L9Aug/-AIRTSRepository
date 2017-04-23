@@ -318,8 +318,7 @@ public class BaseBuilding : GameEntity
 
     protected virtual void BuildingDestroyed()
     {
-        TeamManager.TM.Teams[TeamID].BuildingDestroyed(this);
-        VictoryController.VC.UpdateMilitary(TeamID);
+        TeamManager.TM.Teams[TeamID].BuildingDestroyed(this);        
 
         // Spawn Destroyed model.
         // maybe some smoke?

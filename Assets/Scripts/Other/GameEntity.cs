@@ -57,6 +57,7 @@ public class GameEntity : MonoBehaviour
     /// </summary>
     public virtual void Die()
     {
+        VictoryController.VC.UpdateMilitary(TeamID);
         Destroy(this.gameObject);
     }
     #endregion

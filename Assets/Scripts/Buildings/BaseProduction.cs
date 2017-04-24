@@ -124,24 +124,11 @@ public class BaseProduction : BaseBuilding
         return inProduction;
     }
 
-    /// <summary>
-    /// Needs to be implemented still
-    /// </summary>
-    /// <returns></returns>
-    protected StorageBuilding FindStorageBuilding()
-    {
-        return null;
-    }
-
     protected object IsThereAStorageBuilding()
     {
         return (FindStorageBuilding() != null) ? true : false;
     }
 
-    /// <summary>
-    /// Requires implementation
-    /// </summary>
-    /// <returns></returns>
     protected object IsThereAnAvailableCourier()
     {
         return (CourierCount > 0) ? true : false;
@@ -181,11 +168,7 @@ public class BaseProduction : BaseBuilding
         CourierCount = BuildingUnits;
     }
 
-    #endregion
-
-    #region Private
-
-    private List<Products> GetMissingProducts()
+    protected List<Products> GetMissingProducts()
     {
         List<Products> RetList = new List<Products>();
 
@@ -193,14 +176,47 @@ public class BaseProduction : BaseBuilding
         {
             int timesNeeded = ProductionRequirements.FindAll(x => x == ProductionRequirements[i]).Count;
 
-            int missing = (timesNeeded * 5) - ProductionStorage.FindAll(x => x == ProductionRequirements[i]).Count;
+            int missing = (ProductionRequirements[i] != Products.Food ? Mathf.Clamp((timesNeeded * 5) - ProductionStorage.FindAll(x => x == ProductionRequirements[i]).Count, 0, timesNeeded * 5) : Mathf.Clamp((timesNeeded * 5) - FoodCount(), 0, timesNeeded * 5));
+
             for(int j = 0; j < missing; ++j)
             {
                 RetList.Add(ProductionRequirements[i]);
             }
+
+            i += timesNeeded - 1;
         }
 
         return RetList;
+    }
+
+    protected object ProductCheck()
+    {
+        bool haveProducts = true;
+
+        for (int i = 0; i < ProductionRequirements.Count; ++i)
+        {
+            int timesNeeded = ProductionRequirements.FindAll(x => x == ProductionRequirements[i]).Count;
+
+            int have = (ProductionRequirements[i] != Products.Food ? ProductionStorage.FindAll(x => x == ProductionRequirements[i]).Count : FoodCount());
+
+            if (have < timesNeeded)
+            {
+                haveProducts = false;
+            }
+
+            i += timesNeeded - 1;
+        }
+
+        return haveProducts;
+    }
+
+    #endregion
+
+    #region Private
+
+    private int FoodCount()
+    {
+        return ProductionStorage.FindAll(x => x == Products.Fish || x == Products.Fruit || x == Products.Water || x == Products.Meat || x == Products.Wine || x == Products.Bread).Count;
     }
 
     #endregion

@@ -267,7 +267,7 @@ public class BaseBuilding : GameEntity
 
     public virtual void CourierReturned()
     {
-
+        ++CourierCount;
     }
 
     #endregion
@@ -337,31 +337,38 @@ public class BaseBuilding : GameEntity
     }
 
     protected virtual void BeginOperational() { }
-    
-    protected virtual bool SendCourierWithProductsFunc()
+
+    protected StorageBuilding FindStorageBuilding()
     {
         // find closest storage building with space
         List<BaseBuilding> StorageBuildings = TeamManager.TM.Teams[TeamID].BuildingsList.FindAll(x => x is StorageBuilding);
 
+        StorageBuilding storageBuildingToUse = null;
 
-        if (StorageBuildings.Count > 0)
+        float dist = float.MaxValue;
+
+        for (int i = 0; i < StorageBuildings.Count; ++i)
         {
-            StorageBuilding storageBuildingToUse = new StorageBuilding();
+            float tempDist = Vector3.Distance(transform.position, StorageBuildings[i].transform.position);
 
-            float dist = float.MaxValue;
-
-            for(int i = 0; i < StorageBuildings.Count; ++i)
+            if (tempDist < dist)
             {
-                float tempDist = Vector3.Distance(transform.position, StorageBuildings[i].transform.position);
-
-                if(tempDist < dist)
+                if (((StorageBuilding)StorageBuildings[i]).RemainingSpace > 5)
                 {
-                    if(((StorageBuilding)StorageBuildings[i]).RemainingSpace > 5)
-                    {
-                        storageBuildingToUse = (StorageBuilding)StorageBuildings[i];
-                    } 
+                    storageBuildingToUse = (StorageBuilding)StorageBuildings[i];
                 }
             }
+        }
+
+        return storageBuildingToUse;
+    }
+
+    protected virtual void SendCourierWithProductsFunc()
+    {
+        StorageBuilding storageBuildingToUse = FindStorageBuilding();
+
+        if (storageBuildingToUse != null)
+        {
 
             // send courier with products
             if (storageBuildingToUse != null)
@@ -373,10 +380,8 @@ public class BaseBuilding : GameEntity
                 CourierCount--;
             }
             //use on map couriers to track who has been sent.
-
-            return true;
+            
         }
-        return false;
     }
 
     #endregion

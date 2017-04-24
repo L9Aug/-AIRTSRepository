@@ -58,17 +58,15 @@ public class Market : BaseBuilding
             }
         }
 
-        if(ItemsStored.Count > 5)
+        if (ItemsStored.Count > 5)
         {
             // attempt to send courier
-            if(CourierCount > 0)
+            if (CourierCount > 0)
             {
-                if (SendCourierWithProductsFunc())
-                {
-                    --CourierCount;
-                }
+                SendCourierWithProductsFunc();
             }
         }
+
     }
 
     #endregion

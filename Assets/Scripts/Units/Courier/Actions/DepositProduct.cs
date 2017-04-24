@@ -7,12 +7,17 @@ public class DepositProduct : TargetedAction
 {
     BaseBuilding target;
     Courier unit;
-    
+
+    public override bool CanRun(GOAPAgent agent)
+    {
+        return unit.inventory.Count > 0;
+    }
+
     void SetupRequirements()
     {
-        AddPrecondition(new GOAPState("At Destination", true));
-        AddPrecondition(new GOAPState("Has Destination", true));
-        AddPrecondition(new GOAPState("Must Deposit Products", true));
+        AddPrecondition(new GOAPState("At Destination", new List<object> { true }));
+        AddPrecondition(new GOAPState("Has Destination", new List<object> { true }));
+        AddPrecondition(new GOAPState("Must Deposit Products", new List<object> { true }));
     }
 
     void SetupEffects()
@@ -24,8 +29,8 @@ public class DepositProduct : TargetedAction
     {
         satisfiesStates = new List<GOAPState>
         {
-            new GOAPState("Has Inventory", false),
-            new GOAPState("Must Deposit Products", false),
+            new GOAPState("Has Inventory", new List<object> {false }),
+            new GOAPState("Must Deposit Products", new List<object> {false }),
         };
     }
 
@@ -51,10 +56,13 @@ public class DepositProduct : TargetedAction
 
 
 	// Use this for initialization
-	void Start ()
+	void Awake ()
     {
         unit = GetComponent<Courier>();
+        Agent = unit.GOAP;
+        Agent.AvailableActions.Add(this);
         SetupRequirements();
+        SetupSatisfactions();
         SetupEffects();
 	}
 

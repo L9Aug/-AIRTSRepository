@@ -8,8 +8,8 @@ namespace GOAP
     public abstract class GOAPGoal
     {
         public string Name;
-        public List<GOAPState> Preconditions;
-        public UtilityAction<GOAPGoal> UtilAction;
+        public List<GOAPState> Preconditions = new List<GOAPState>();
+        public UtilityAction<GOAPGoal> UtilAction = new UtilityAction<GOAPGoal>();
 
         public BaseUnit unit;
 

@@ -17,8 +17,8 @@ public class AttackBuildingGoal : GOAPGoal
     {
         Preconditions = new List<GOAPState>
         {
-            new GOAPState("Has Target", true),
-            new GOAPState("Target in Range", true)
+            new GOAPState("Has Target", new List<object> {true }),
+            new GOAPState("Target in Range", new List<object> {true })
         };
     }
 

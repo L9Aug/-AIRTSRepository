@@ -9,16 +9,19 @@ namespace GOAP
     public class GOAPAction : MonoBehaviour
     {
         public GOAPAgent Agent;
-        public List<GOAPState> satisfiesStates;
-        public List<GOAPState> requiredStates;
+        public List<GOAPState> satisfiesStates = new List<GOAPState>();
+        public List<GOAPState> requiredStates = new List<GOAPState>();
         public float Cost;
         bool isActive;
-
-        //public GOAPAgent Agent; 
-
-        public List<Action> effects; 
-
+        public List<Action> effects = new List<Action>(); 
         public bool isFinished;
+
+        protected virtual void Start()
+        {
+
+        }
+
+
 
         public virtual bool TestForFinished()
         {

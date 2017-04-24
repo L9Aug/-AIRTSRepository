@@ -4,12 +4,9 @@ using System.Collections.Generic;
 
 namespace GOAP
 {
-    public class GOAPPlanner : MonoBehaviour
+    [System.Serializable]
+    public class GOAPPlanner
     {
-        //public List<GOAPState> WorldState;
-        //public List<GOAPAction> AvailableActions;
-        //public GOAPGoal TargetGoal;
-
         public List<GOAPAction> GetActionPlan(GOAPAgent Agent, List<GOAPState> WorldState, List<GOAPAction> AvailableActions, GOAPGoal goal)
         {
             List<GOAPAction> usable = new List<GOAPAction>();

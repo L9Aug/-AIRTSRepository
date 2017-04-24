@@ -17,7 +17,7 @@ public class ExploreGoal : GOAPGoal
     {
         Preconditions = new List<GOAPState>
         {
-            new GOAPState("Target is Enemy", false)
+            new GOAPState("Target is Enemy", new List<object> {false })
         };
     }
 

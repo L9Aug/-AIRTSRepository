@@ -9,16 +9,21 @@ public class MoveAction : GOAPAction
 
     public void SetupPrecons()
     {
-        AddPrecondition(new GOAPState("Has Path", true));
+        AddPrecondition(new GOAPState("Has Path", new List<object> { true }));
+    }
+
+    public override bool CanRun(GOAPAgent agent)
+    {
+        return unit.path.Count < 0;
     }
 
     public void SetupSatisfactions()
     {
         satisfiesStates = new List<GOAPState>
         {
-            new GOAPState("At Destination", true),
-            new GOAPState("At Home", true),
-            new GOAPState("Target in Range", true),
+            new GOAPState("At Destination", new List<object> {true }),
+            new GOAPState("At Home", new List<object> {true }),
+            new GOAPState("Target in Range", new List<object> {true }),
 
         };
     }
@@ -39,10 +44,21 @@ public class MoveAction : GOAPAction
     }
 
 	// Use this for initialization
-	public virtual void Start ()
+	public virtual void Awake ()
     {
         unit = GetComponent<BaseUnit>();
+        if (GetComponent<MilitaryUnit>() != null)
+        {
+            Agent = GetComponent<MilitaryUnit>().GOAP;
+        }
+        if (GetComponent<Courier>() != null)
+        {
+            Agent = GetComponent<Courier>().GOAP;
+        }
+
+        Agent.AvailableActions.Add(this);
         SetUpEffects();
+        SetupSatisfactions();
         SetupPrecons();
 	}
 	

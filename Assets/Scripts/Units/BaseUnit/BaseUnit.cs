@@ -17,7 +17,7 @@ public class BaseUnit : GameEntity
     public HexTransform Destination;
 
     public State move;
-    public List<AStarInfo<HexTile>> path;
+    public List<AStarInfo<HexTile>> path = new List<AStarInfo<HexTile>>();
 
     public ASImplementation<HexTile> aStar = new ASImplementation<HexTile>();
 

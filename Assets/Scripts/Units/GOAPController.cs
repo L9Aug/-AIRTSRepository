@@ -9,7 +9,7 @@ namespace GOAP
         public static GOAPController GC;
         public int MaxAgentsPerFrame = 30;
 
-        List<GOAPAgent> Agents = new List<GOAPAgent>();
+        public List<GOAPAgent> Agents = new List<GOAPAgent>();
 
         public void EnqueueForPlanning(GOAPAgent agent)
         {

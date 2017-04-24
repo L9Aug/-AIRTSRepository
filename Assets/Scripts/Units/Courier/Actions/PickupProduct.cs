@@ -13,19 +13,24 @@ public class PickupProduct : TargetedAction
 
     }
 
+    public override bool CanRun(GOAPAgent agent)
+    {
+        return unit.inventory.Count < unit.inventorySpace;
+    }
+
     void SetupSatisfactions()
     {
         satisfiesStates = new List<GOAPState>
         {
-            new GOAPState("Must Deposit Items", true),
-            new GOAPState("Tasks Complete", true)
+            new GOAPState("Must Deposit Items", new List<object> {true }),
+            new GOAPState("Tasks Complete", new List<object> {true })
         };
     }
 
     void SetupPrereqs()
     {
-        AddPrecondition(new GOAPState("Has Tickets", true));
-        AddPrecondition(new GOAPState("At Destination", true));
+        AddPrecondition(new GOAPState("Has Tickets", new List<object> { true }));
+        AddPrecondition(new GOAPState("At Destination", new List<object> { true }));
     }
 
     void SetupEffects()
@@ -57,11 +62,15 @@ public class PickupProduct : TargetedAction
     }
 
 	// Use this for initialization
-	void Start ()
+	void Awake()
     {
         unit = GetComponent<Courier>();
+        Agent = unit.GOAP;
+
+        Agent.AvailableActions.Add(this);
         SetupSatisfactions();
         SetupEffects();
+        SetupPrereqs();
 	}
 	
 	// Update is called once per frame

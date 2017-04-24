@@ -24,8 +24,8 @@ public class AttackTargetGoal : GOAPGoal
     {
         Preconditions = new List<GOAPState>
         {
-            new GOAPState("Target is Enemy", true),
-            new GOAPState("Target in Range", true)
+            new GOAPState("Target is Enemy", new List<object> {true }),
+            new GOAPState("Target in Range", new List<object> {true })
         };
     }
 

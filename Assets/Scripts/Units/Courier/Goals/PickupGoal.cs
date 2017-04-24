@@ -6,16 +6,22 @@ using System;
 
 public class PickupGoal : GOAPGoal
 {
-    BaseBuilding dest;
-    Courier unit;
+    new Courier unit;
+
+    public override void Initialise(BaseUnit Unit)
+    {
+        unit = (Courier)Unit;
+        SetupPrecons();
+        SetupUtility();
+    }
 
     public override void SetupPrecons()
     {
         Preconditions = new List<GOAPState>
         {
-            new GOAPState("At Destination", true),
-            new GOAPState("Has Tickets", true),
-            new GOAPState("Has Inventory Space", true)
+            new GOAPState("At Destination", new List<object> {true }),
+            new GOAPState("Has Tickets", new List<object> {true }),
+            new GOAPState("Has Inventory Space", new List<object> {true })
         };
     }
 
@@ -28,7 +34,7 @@ public class PickupGoal : GOAPGoal
 
     float DistanceToDestination()
     {
-        return (float)unit.hexTransform.CalcHexManhattanDist(dest.hexTransform);
+        return (float)unit.hexTransform.CalcHexManhattanDist(unit.DestinationBuilding.hexTransform);
     }
 
     float HasInventorySpace()
@@ -40,19 +46,4 @@ public class PickupGoal : GOAPGoal
     {
         unit = Unit;
     }
-
-    public void UpdateGoal(BaseBuilding destination)
-    {
-        dest = destination;
-    }
-
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

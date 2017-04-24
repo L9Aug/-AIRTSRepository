@@ -9,13 +9,13 @@ public class AttackAction : TargetedAction
 
     void SetupPreconditions()
     {
-        AddPrecondition(new GOAPState("Target is Enemy", true));
-        AddPrecondition(new GOAPState("Target in Range", true));
+        AddPrecondition(new GOAPState("Target is Enemy", new List<object> { true }));
+        AddPrecondition(new GOAPState("Target in Range", new List<object> { true }));
     }
 
     void SetupSatisfactions()
     {
-        satisfiesStates.Add(new GOAPState("Has Target", false));
+        satisfiesStates.Add(new GOAPState("Has Target", new List<object> { false }));
     }
 
     public void SetUpEffects()
@@ -41,9 +41,11 @@ public class AttackAction : TargetedAction
     }
 
 	// Use this for initialization
-	void Start ()
+	void Awake()
     {
         unit = GetComponent <MilitaryUnit>();
+        Agent = unit.GOAP;
+        Agent.AvailableActions.Add(this);
         SetupPreconditions();
         SetUpEffects();
         SetupSatisfactions();

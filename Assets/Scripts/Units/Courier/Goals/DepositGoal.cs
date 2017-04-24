@@ -6,25 +6,21 @@ using System;
 
 public class DepositGoal : GOAPGoal
 {
-    int maxInventory;
-    int inventoryCount;
-    BaseBuilding targetBuilding;
     new Courier unit;
 
-    
-
-    void Start()
+    public override void Initialise(BaseUnit Unit)
     {
-        targetBuilding = unit.DestinationBuilding;
+        unit = (Courier)Unit;
+        SetupPrecons();
+        SetupUtility();
     }
-
 
     public override void SetupPrecons()
     {
-        Preconditions.Add(new GOAPState("Has Target", true));
-        Preconditions.Add(new GOAPState("At Destination", true));
-        Preconditions.Add(new GOAPState("Has Destination", true));
-        Preconditions.Add(new GOAPState("Must Deposit Products", true));
+        Preconditions.Add(new GOAPState("Has Target", new List<object> { true }));
+        Preconditions.Add(new GOAPState("At Destination", new List<object> { true }));
+        Preconditions.Add(new GOAPState("Has Destination", new List<object> { true }));
+        Preconditions.Add(new GOAPState("Must Deposit Products", new List<object> { true }));
     }
 
     public override void SetupUtility()
@@ -37,17 +33,6 @@ public class DepositGoal : GOAPGoal
         UtilAction.Considerations[2].GetInput = DistanceToTarget;
     }
 
-    public void SetUp(int InventorySize, BaseBuilding target, BaseUnit unit)
-    {
-        targetBuilding = target;
-        maxInventory = InventorySize;
-    }
-
-    public void SetTargetBuilding(BaseBuilding target)
-    {
-        targetBuilding = target;
-    }
-    
     float SendInventoryCount()
     {
         return unit.inventory.Count / unit.inventorySpace;
@@ -55,7 +40,7 @@ public class DepositGoal : GOAPGoal
 
     float InventoryAtMax()
     {
-        if (inventoryCount >= maxInventory)
+        if (unit.inventory.Count >= unit.inventorySpace)
             return 1;
         else
             return 0;
@@ -63,7 +48,7 @@ public class DepositGoal : GOAPGoal
 
     float DistanceToTarget()
     {
-        return (float)HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)unit.hexTransform.RowColumn.x, (int)unit.hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)targetBuilding.hexTransform.RowColumn.x, (int)targetBuilding.hexTransform.RowColumn.y].ASI);
+        return (float)HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)unit.hexTransform.RowColumn.x, (int)unit.hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)unit.DestinationBuilding.hexTransform.RowColumn.x, (int)unit.DestinationBuilding.hexTransform.RowColumn.y].ASI);
     }
 
 }

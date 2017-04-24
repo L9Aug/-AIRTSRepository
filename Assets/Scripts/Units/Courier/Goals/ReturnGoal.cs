@@ -17,8 +17,8 @@ public class ReturnGoal : GOAPGoal
     {
         Preconditions = new List<GOAPState>
         {
-            new GOAPState("Tasks Complete", true),
-            new GOAPState("At Home", true)
+            new GOAPState("Tasks Complete", new List<object> {true }),
+            new GOAPState("At Home", new List<object> {true })
         };
     }
 

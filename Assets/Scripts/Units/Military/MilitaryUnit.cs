@@ -14,7 +14,7 @@ public class MilitaryUnit : BaseUnit
 
     public GameObject target;
 
-    public GOAPAgent GOAP;
+    public GOAPAgent GOAP = new GOAPAgent();
 
     public AttackTargetGoal attackGoal;
     public AttackBuildingGoal buildingAttack;
@@ -29,11 +29,11 @@ public class MilitaryUnit : BaseUnit
     {
         List<GOAPState> worldState = new List<GOAPState>()
         {
-            new GOAPState("Has Target", (target != null)),
-            new GOAPState("Target in Range", (target.GetType() == typeof(GameEntity)) ? (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) <= attackRange) : false),
-            new GOAPState("Target is Enemy", (target.GetType() == typeof(GameEntity)) ? (target.GetComponent<GameEntity>().TeamID != TeamID) : false),
-            new GOAPState("Target is Tile", target.GetType() == typeof(HexTile)),
-            new GOAPState("Has Path", (path.Count > 0))
+            new GOAPState("Has Target", new List<object> {(target != null) }),
+            new GOAPState("Target in Range", new List<object> {(target.GetType() == typeof(GameEntity)) ? (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) <= attackRange) : false }),
+            new GOAPState("Target is Enemy", new List<object> {(target.GetType() == typeof(GameEntity)) ? (target.GetComponent<GameEntity>().TeamID != TeamID) : false }),
+            new GOAPState("Target is Tile", new List<object> {target.GetType() == typeof(HexTile) }),
+            new GOAPState("Has Path", new List<object> {(path.Count > 0) })
         };
         return worldState;
     }
@@ -61,6 +61,7 @@ public class MilitaryUnit : BaseUnit
     {
         base.Start();
         SMActive = false;
+        GOAP = new GOAPAgent();
         GOAP.AvailableActions.AddRange(GetComponents<GOAPAction>());
         GOAP.util.Actions.Add(attackGoal.UtilAction);
         GOAP.util.Actions.Add(buildingAttack.UtilAction);

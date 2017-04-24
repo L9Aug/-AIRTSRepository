@@ -4,22 +4,15 @@ using System.Collections.Generic;
 
 namespace GOAP
 {
-    public class GOAPAgent : MonoBehaviour
+    [System.Serializable]
+    public class GOAPAgent
     {
         public List<GOAPAction> AvailableActions = new List<GOAPAction>();
-        public List<GOAPAction> ActionPlan;
-        public GOAPPlanner Planner;
+        public List<GOAPAction> ActionPlan = new List<GOAPAction>();
+        public GOAPPlanner Planner = new GOAPPlanner();
         public List<GOAPState> WorldState;
         public GOAPGoal currentGoal;
-        public UtilityEngine<GOAPGoal> util;
-        
-        /// <summary>
-        /// Call this on the agent you've created in either Start or Awake
-        /// </summary>
-        public virtual void Initialise()
-        {
-            AvailableActions.AddRange(GetComponents<GOAPAction>());
-        }
+        public UtilityEngine<GOAPGoal> util = new UtilityEngine<GOAPGoal>();
 
         public void SetWorldState(List<GOAPState> ws)
         {
@@ -28,10 +21,9 @@ namespace GOAP
 
         public List<Action> UpdateAgent()
         {
-
             List<GOAPGoal> goalList = util.RunUtilityEngine();
 
-            if(goalList[0] != currentGoal)
+            if (goalList[0] != currentGoal)
             {
                 currentGoal = goalList[0];
                 GOAPController.GC.EnqueueForPlanning(this);
@@ -39,12 +31,18 @@ namespace GOAP
                 //ActionPlan.AddRange(Planner.GetActionPlan(this, WorldState, AvailableActions, currentGoal));
             }
 
-            if (ActionPlan[0].TestForFinished())
+            if (ActionPlan != null)
             {
-                ActionPlan.RemoveAt(0);
+                if (ActionPlan.Count > 0)
+                {
+                    if (ActionPlan[0].TestForFinished())
+                    {
+                        ActionPlan.RemoveAt(0);
+                    }
+                    return ActionPlan[0].effects;
+                }
             }
-
-            return ActionPlan[0].effects;
+            return new List<Action>();
         }
     }
 }

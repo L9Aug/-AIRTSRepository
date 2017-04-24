@@ -26,7 +26,7 @@ namespace GOAP
         {
             Name = name;
 
-            foreach(bool obj in items)
+            foreach(object obj in items)
             {
                 Items.Add(obj);
             }
@@ -35,6 +35,7 @@ namespace GOAP
         public GOAPState(string name, List<object> items)
         {
             Name = name;
+            Items = items;
         }
 
         public bool Equals(GOAPState obj)

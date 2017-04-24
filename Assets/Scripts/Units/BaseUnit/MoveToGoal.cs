@@ -10,7 +10,7 @@ public class MoveToGoal : GOAPGoal
 
     public override void SetupPrecons()
     {
-        Preconditions.Add(new GOAPState("Has Target", true));
+        Preconditions.Add(new GOAPState("Has Target", new List<object> { true }));
 
     }
 

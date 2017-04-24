@@ -7,16 +7,21 @@ public class GetPathAction : GOAPAction
 {
     BaseUnit unit;
 
+    public override bool CanRun(GOAPAgent agent)
+    {
+        return true;
+    }
+
     void SetupPrecons()
     {
-        AddPrecondition(new GOAPState("Has Path", false));
+        AddPrecondition(new GOAPState("Has Path", new List<object> { false }));
     }
 
     void SatisfiesStates()
     {
         satisfiesStates = new List<GOAPState>
         {
-            new GOAPState("Has Path", true)
+            new GOAPState("Has Path", new List<object> {true })
         };
     }
 
@@ -26,10 +31,24 @@ public class GetPathAction : GOAPAction
     }
 
 	// Use this for initialization
-	void Start ()
+	void Awake ()
     {
+
         unit = GetComponent<BaseUnit>();
+
+        if (GetComponent<MilitaryUnit>() != null)
+        {
+            Agent = GetComponent<MilitaryUnit>().GOAP;
+        }
+        if(GetComponent<Courier>() != null)
+        {
+            Agent = GetComponent<Courier>().GOAP;
+        }
+
+        Agent.AvailableActions.Add(this);
+
         SetupPrecons();
+        SatisfiesStates();
         SetupEffects();
 	}
 	

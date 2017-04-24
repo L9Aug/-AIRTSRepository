@@ -1,39 +1,37 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using Condition;
+using UnityEngine;
 using SM;
+using Condition;
 
-public class Builder : BaseUnit
+public class Merchant : BaseUnit
 {
+
     public BaseBuilding assignedBuilding;
     public BaseBuilding homeBuilding;
 
     State moveToBuildingSite;
     State returnHome;
 
-    Products gold;
-
     BoolCondition positionCorrect = new BoolCondition();
 
     ALessThanB buildTimeComplete = new ALessThanB();
-   
-    public void Initialise (BaseBuilding home, BaseBuilding assign, int teamID, Products Gold, HexTile startTile)
+
+    public void Initialise(BaseBuilding home, BaseBuilding assign, int teamID, HexTile startTile)
     {
         TeamManager.TM.Teams[TeamID].Population.CitizenCount--;
         homeBuilding = home;
         assignedBuilding = assign;
         TeamID = teamID;
-        gold = Gold;
         hexTransform = startTile.hexTransform;
     }
 
     // Use this for initialization
-    protected override void Start ()
+    protected override void Start()
     {
         base.Start();
         setupStateMachine();
-	}
+    }
 
     protected override void Update()
     {
@@ -43,11 +41,6 @@ public class Builder : BaseUnit
     void ReturnHome()
     {
         Destroy(gameObject);
-    }
-
-    public void GiveGold(Products giveItems)
-    {
-        gold = giveItems;
     }
 
     public void AssignDestination(BaseBuilding dest)
@@ -71,8 +64,6 @@ public class Builder : BaseUnit
         return hexTransform.CalcHexManhattanDist(homeBuilding.hexTransform);
     }
 
-    
-
     void FindDestination()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)assignedBuilding.hexTransform.RowColumn.x, (int)assignedBuilding.hexTransform.RowColumn.y].ASI, HeuristicFunc);
@@ -85,7 +76,7 @@ public class Builder : BaseUnit
 
     void Build()
     {
-        assignedBuilding.BuilderArrived();
+        assignedBuilding.MerchantArrived();
     }
 
     float GetConstructionTime()
@@ -105,7 +96,7 @@ public class Builder : BaseUnit
         buildTimeComplete.B = ReturnZero;
 
         Transition arriveAtSite = new Transition("Arrived At Site", positionCorrect, new List<Action> { Build });
-        Transition buildingComplete = new Transition("Building Complete", buildTimeComplete, new List<Action>() { ReturnHome } );
+        Transition buildingComplete = new Transition("Building Complete", buildTimeComplete, new List<Action>() { ReturnHome });
 
         moveToBuildingSite = new State("Moving To building Site",
             new List<Transition>() { arriveAtSite },
@@ -115,8 +106,8 @@ public class Builder : BaseUnit
 
         State build = new State("Constructing",
             new List<Transition>() { buildingComplete },
-            new List<Action> {  },
-            new List<Action>() {  },
+            new List<Action> { },
+            new List<Action>() { },
             null);
 
         returnHome = new State("Retuning Home",

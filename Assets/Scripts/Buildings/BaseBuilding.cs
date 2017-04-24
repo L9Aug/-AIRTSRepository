@@ -25,7 +25,7 @@ public class BaseBuilding : GameEntity
     /// The tiles that act as the entrance to this building.
     /// </summary>
     [HideInInspector]
-    public List<HexTile> EntanceTiles = new List<HexTile>();
+    public List<HexTile> EntranceTiles = new List<HexTile>();
 
     /// <summary>
     /// The tiles that make up the area of this building.
@@ -265,6 +265,11 @@ public class BaseBuilding : GameEntity
         return myItem.Product;
     }
 
+    public virtual void CourierReturned()
+    {
+
+    }
+
     #endregion
 
     #region Protected
@@ -326,9 +331,7 @@ public class BaseBuilding : GameEntity
     }
 
     protected virtual void BeginOperational() { }
-
-    protected virtual void CourierReterned() { }
-
+    
     protected virtual bool SendCourierWithProductsFunc()
     {
         // find closest storage building with space
@@ -337,7 +340,7 @@ public class BaseBuilding : GameEntity
 
         if (StorageBuildings.Count > 0)
         {
-            StorageBuilding storageBuildingToUse;
+            StorageBuilding storageBuildingToUse = new StorageBuilding();
 
             float dist = float.MaxValue;
 
@@ -352,11 +355,17 @@ public class BaseBuilding : GameEntity
                         storageBuildingToUse = (StorageBuilding)StorageBuildings[i];
                     } 
                 }
-
             }
 
             // send courier with products
-
+            if (storageBuildingToUse != null)
+            {
+                HexTile tileToUse = EntranceTiles[Random.Range(0, EntranceTiles.Count - 1)];
+                OnMapCouriers.Add(Instantiate(GlobalAttributes.Global.Units[(int)Units.Courier], tileToUse.transform.position, Quaternion.identity, transform));
+                OnMapCouriers[OnMapCouriers.Count - 1].GetComponent<Courier>().AddToInventory(EmptyStorage());
+                OnMapCouriers[OnMapCouriers.Count - 1].GetComponent<Courier>().SetOutboundCourier(this, storageBuildingToUse);
+                CourierCount--;
+            }
             //use on map couriers to track who has been sent.
 
             return true;

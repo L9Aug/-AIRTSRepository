@@ -321,7 +321,7 @@ public class BaseAITeam : MonoBehaviour
     private void SetExlusionZone(BaseBuilding Building)
     {
         Building.exclusionZone = MapGenerator.Map[(int)Building.hexTransform.RowColumn.x, (int)Building.hexTransform.RowColumn.y].GetHexRing(Building.Size + 1);
-        Building.EntanceTiles.AddRange(Building.exclusionZone);
+        Building.EntranceTiles.AddRange(Building.exclusionZone);
         //float count = 0;
         foreach (HexTile h in Building.exclusionZone)
         {
@@ -377,14 +377,17 @@ public class BaseAITeam : MonoBehaviour
         //Dispatch Builders
         for (int i = 0; i < tier; ++i)
         {
-            HexTile buildingEntranceTile = BuildingsList[0].EntanceTiles[Random.Range(0, BuildingsList[0].EntanceTiles.Count - 1)];
+            HexTile buildingEntranceTile = BuildingsList[0].EntranceTiles[Random.Range(0, BuildingsList[0].EntranceTiles.Count - 1)];
             //HexTile buildingEntranceTile = MapGenerator.Map[(int)BuildingsList[0].hexTransform.RowColumn.x, (int)BuildingsList[0].hexTransform.RowColumn.y];
             Population.Citizens.Add((BaseUnit)Instantiate(GlobalAttributes.Global.Units[(int)Units.Builder], buildingEntranceTile.transform.position, Quaternion.identity, transform));
             Population.Citizens[Population.Citizens.Count - 1].GetComponent<Builder>().Initialise(BuildingsList[0], BuildingsList[BuildingsList.Count - 1], TeamID, Products.Gold, buildingEntranceTile);
         }
         if (tier == 4)
         {
+            HexTile buildingEntranceTile = BuildingsList[0].EntranceTiles[Random.Range(0, BuildingsList[0].EntranceTiles.Count - 1)];
             Population.MerchantCount -= 1;
+            Population.Citizens.Add(Instantiate(GlobalAttributes.Global.Units[(int)Units.Merchant], buildingEntranceTile.transform.position, Quaternion.identity, transform));
+            Population.Citizens[Population.Citizens.Count - 1].GetComponent<Merchant>().Initialise(BuildingsList[0], BuildingsList[BuildingsList.Count - 1], TeamID, buildingEntranceTile);
             //Dispatch Merchant.
 
         }

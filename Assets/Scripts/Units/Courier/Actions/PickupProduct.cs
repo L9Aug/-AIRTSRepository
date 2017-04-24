@@ -42,9 +42,14 @@ public class PickupProduct : TargetedAction
     void Retrieve()
     {
         // Trade the tickets for items 
-        Debug.Log("Retrieve has not been fully implemented in " + this);
-
-        GetComponent<Courier>().AddToInventory(new List<Products>());
+        if (unit.inventory.Count < unit.inventorySpace && unit.ticketList.Count > 0)
+        {
+            if (unit.ticketList[0].ProductOwner == target)
+            {
+                unit.inventory.Add(target.RedeemKalamataTicket(unit.ticketList[0]));
+                unit.ticketList.RemoveAt(0);
+            }
+        }
     }
 
     public override bool TestForFinished()

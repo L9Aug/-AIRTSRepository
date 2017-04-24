@@ -62,7 +62,7 @@ public class Courier : BaseUnit
         }
     }
 
-    public void SetInitialDestinations(BaseBuilding home, BaseBuilding destination)
+    public void SetOutboundCourier(BaseBuilding home, BaseBuilding destination)
     {
         HomeBuilding = home;
         DestinationBuilding = destination;

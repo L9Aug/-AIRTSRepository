@@ -91,9 +91,9 @@ public class Market : BaseBuilding
         CourierCount = Tier;
     }
 
-    protected override void CourierReterned()
+    public override void CourierReturned()
     {
-        base.CourierReterned();
+        base.CourierReturned();
         ++CourierCount;
     }
 

@@ -56,11 +56,6 @@ public class Citizen : BaseUnit
         path = Path;
     }
 
-    float HomeHeuristicCalc()
-    {
-        return hexTransform.CalcHexManhattanDist(homeBuilding.hexTransform);
-    }
-
     void FindDestination()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)assignedBuilding.hexTransform.RowColumn.x, (int)assignedBuilding.hexTransform.RowColumn.y].ASI, HeuristicFunc);
@@ -76,24 +71,11 @@ public class Citizen : BaseUnit
         assignedBuilding.BuilderArrived();
     }
 
-    float GetConstructionTime()
-    {
-        return assignedBuilding.ConstructionTimer;
-    }
-
-    float ReturnZero()
-    {
-        return 0;
-    }
-
     private void SetupStateMachine()
     {
         positionCorrect.Condition = TestTiles;
-        buildTimeComplete.A = GetConstructionTime;
-        buildTimeComplete.B = ReturnZero;
 
-        Transition arriveAtSite = new Transition("Arrived At Site", positionCorrect, new List<Action> { });
-        Transition buildingComplete = new Transition("Building Complete", buildTimeComplete, new List<Action>() { ReturnHome });
+        Transition arriveAtSite = new Transition("Arrived At Site", positionCorrect, new List<Action> { ReturnHome });
 
         moveToBuildingSite = new State("Moving To building Site",
             new List<Transition>() { arriveAtSite },

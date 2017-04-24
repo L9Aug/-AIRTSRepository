@@ -27,11 +27,14 @@ public class MilitaryUnit : BaseUnit
 
     public List<GOAPState> GetWorldState()
     {
-        List<GOAPState> worldState = new List<GOAPState>();
-        worldState.Add(new GOAPState("Has Target", (target != null)));
-        worldState.Add(new GOAPState("Target in Range", (target.GetType() == typeof(GameEntity)) ? (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) <= attackRange) : false));
-        worldState.Add(new GOAPState("Target is Enemy", (target.GetType() == typeof(GameEntity)) ? (target.GetComponent<GameEntity>().TeamID != TeamID) : false));
-        worldState.Add(new GOAPState("Target is Tile", target.GetType() == typeof(HexTile)));
+        List<GOAPState> worldState = new List<GOAPState>()
+        {
+            new GOAPState("Has Target", (target != null)),
+            new GOAPState("Target in Range", (target.GetType() == typeof(GameEntity)) ? (HexTransform.CalcHexManhattanDist(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[(int)target.GetComponent<GameEntity>().hexTransform.RowColumn.x, (int)target.GetComponent<GameEntity>().hexTransform.RowColumn.y].ASI) <= attackRange) : false),
+            new GOAPState("Target is Enemy", (target.GetType() == typeof(GameEntity)) ? (target.GetComponent<GameEntity>().TeamID != TeamID) : false),
+            new GOAPState("Target is Tile", target.GetType() == typeof(HexTile)),
+            new GOAPState("Has Path", (path.Count > 0))
+        };
         return worldState;
     }
 
@@ -45,7 +48,7 @@ public class MilitaryUnit : BaseUnit
 
     public override void GetPath()
     {
-        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[MapGenerator.MG.x, MapGenerator.MG.y].ASI, HeuristicFunc);
+        //path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, , HeuristicFunc);
     }
 
     protected override void Start()

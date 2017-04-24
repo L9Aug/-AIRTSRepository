@@ -49,7 +49,7 @@ public class Courier : BaseUnit
             new GOAPState("At Destination", (hexTransform.Position == DestinationBuilding.hexTransform.Position)),
             new GOAPState("Products Available", TeamManager.TM.Teams[TeamID].FindProducts(shoppingList.ToArray())),
             new GOAPState("Has Tickets", (ticketList.Count > 0)),
-
+            new GOAPState("Has Path", (path.Count > 0))
         };
         return worldState; 
     }
@@ -82,6 +82,7 @@ public class Courier : BaseUnit
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, DestinationBuilding.EntranceTiles[Random.Range(0, DestinationBuilding.EntranceTiles.Count)].ASI, HeuristicFunc);
     }
+
     /*void GetPathHome()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, 

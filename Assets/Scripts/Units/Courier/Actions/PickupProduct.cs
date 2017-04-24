@@ -5,13 +5,7 @@ using GOAP;
 
 public class PickupProduct : TargetedAction
 {
-    new BaseBuilding target;
-
-    List<KalamataTicket> tickets;
     Courier unit;
-    int itemsInInventory;
-    int maxInventorySpace;
-
 
     public override void ActionUpdate(GOAPAgent agent)
     {
@@ -44,9 +38,9 @@ public class PickupProduct : TargetedAction
         // Trade the tickets for items 
         if (unit.inventory.Count < unit.inventorySpace && unit.ticketList.Count > 0)
         {
-            if (unit.ticketList[0].ProductOwner == target)
+            if (unit.ticketList[0].ProductOwner == unit.DestinationBuilding)
             {
-                unit.inventory.Add(target.RedeemKalamataTicket(unit.ticketList[0]));
+                unit.inventory.Add(unit.DestinationBuilding.RedeemKalamataTicket(unit.ticketList[0]));
                 unit.ticketList.RemoveAt(0);
             }
         }
@@ -54,13 +48,7 @@ public class PickupProduct : TargetedAction
 
     public override bool TestForFinished()
     {
-        return (unit.inventory.Count > 0);
-    }
-
-    void GetUpdate(List<KalamataTicket> Ticks, int invCount)
-    {
-        itemsInInventory = invCount;
-        tickets = Ticks;
+        return (unit.ticketList[0].ProductOwner != unit.DestinationBuilding);
     }
 
 	// Use this for initialization

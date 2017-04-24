@@ -31,7 +31,12 @@ public class DepositProduct : TargetedAction
 
     public override bool TestForFinished()
     {
-        return (unit.inventory.Count == 0);
+        if (unit.inventory.Count == 0)
+        {
+            unit.GetNewDestination();
+            return true;
+        }
+        return false;
     }
 
     void DepositProducts()

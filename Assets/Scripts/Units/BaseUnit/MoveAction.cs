@@ -14,7 +14,12 @@ public class MoveAction : GOAPAction
 
     public override bool TestForFinished()
     {
-        return (unit.hexTransform.CalcHexManhattanDist(unit.Destination) == 0);
+        if((unit.hexTransform.CalcHexManhattanDist(unit.Destination) == 0))
+        {
+            unit.GetNewDestination();
+            return true;
+        }
+        return false;
     }
 
     public void SetUpEffects()

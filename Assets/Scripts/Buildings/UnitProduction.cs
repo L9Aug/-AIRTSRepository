@@ -37,7 +37,7 @@ public class UnitProduction : BaseProduction
         {
             for (int j = 0; j < ProductionRequirements.Count; ++j)
             {
-                ProductionStorage.Add(ProductionRequirements[j] == Products.Food ? Products.Bread : ProductionRequirements[j]);
+                //ProductionStorage.Add(ProductionRequirements[j] == Products.Food ? Products.Bread : ProductionRequirements[j]);
             }
         }
     }

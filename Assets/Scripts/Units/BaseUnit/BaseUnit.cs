@@ -37,6 +37,11 @@ public class BaseUnit : GameEntity
         }
     }
 
+    public virtual void GetPath()
+    {
+
+    }
+
     public void Move()
     {
 

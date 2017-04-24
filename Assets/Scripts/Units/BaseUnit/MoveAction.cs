@@ -7,6 +7,10 @@ public class MoveAction : GOAPAction
 {
     BaseUnit unit;
 
+    public void SetupPrecons()
+    {
+        AddPrecondition(new GOAPState("Has Path", true));
+    }
 
     public override bool TestForFinished()
     {
@@ -19,10 +23,11 @@ public class MoveAction : GOAPAction
     }
 
 	// Use this for initialization
-	public virtual void  Start ()
+	public virtual void Start ()
     {
         unit = GetComponent<BaseUnit>();
         SetUpEffects();
+        SetupPrecons();
 	}
 	
 	// Update is called once per frame

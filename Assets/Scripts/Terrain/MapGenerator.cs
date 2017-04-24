@@ -4,7 +4,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class MapGenerator : MonoBehaviour {
+public class MapGenerator : MonoBehaviour
+{
+    public static MapGenerator MG;
 
     [Tooltip("The number of tiles you want horizontally.")]
     public int x;
@@ -26,6 +28,7 @@ public class MapGenerator : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
+        MG = this;
         StartCoroutine(GenerateMap());
         teamManager = FindObjectOfType<TeamManager>();
     }

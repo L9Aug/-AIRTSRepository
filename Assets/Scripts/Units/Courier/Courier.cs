@@ -21,8 +21,9 @@ public class Courier : BaseUnit
     PickupGoal pickup = new PickupGoal();
 
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         SMActive = false;
         GOAP.util.Actions = new List<UtilityAction<GOAPGoal>>
         {
@@ -53,8 +54,9 @@ public class Courier : BaseUnit
         return worldState; 
     }
 
-    public void Update()
+    protected  override void Update()
     {
+        base.Update();
         GOAP.SetWorldState(GetWorldState());
         foreach(Action a in GOAP.UpdateAgent())
         {
@@ -76,6 +78,10 @@ public class Courier : BaseUnit
         }
     }
 
+    public override void GetPath()
+    {
+        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, DestinationBuilding.EntranceTiles[Random.Range(0, DestinationBuilding.EntranceTiles.Count)].ASI, HeuristicFunc);
+    }
     /*void GetPathHome()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, 

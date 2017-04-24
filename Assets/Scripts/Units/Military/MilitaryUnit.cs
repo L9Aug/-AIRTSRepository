@@ -43,6 +43,11 @@ public class MilitaryUnit : BaseUnit
         }
     }
 
+    public override void GetPath()
+    {
+        path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, MapGenerator.Map[MapGenerator.MG.x, MapGenerator.MG.y].ASI, HeuristicFunc);
+    }
+
     protected override void Start()
     {
         base.Start();

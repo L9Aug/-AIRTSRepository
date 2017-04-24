@@ -41,7 +41,19 @@ namespace GOAP
         public virtual bool CanRun(GOAPAgent agent)
         {
             Debug.Log("CanRun in " + this + " has not been implemented");
-            return false;
+            bool statesMatch = true;
+            foreach(GOAPState state in requiredStates)
+            {
+                foreach(bool match in state.Items)
+                {
+                    if (!match)
+                    {
+                        statesMatch = false;
+                        break;
+                    }
+                }
+            }
+            return statesMatch;
         }
 
         public void AddPrecondition(GOAPState cond)

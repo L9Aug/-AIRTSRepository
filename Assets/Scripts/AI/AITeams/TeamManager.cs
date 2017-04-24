@@ -27,6 +27,12 @@ public class TeamManager : MonoBehaviour
 
     #region Public
 
+    public int Gold;
+
+    public int Civilians;
+
+    public int Merchants;
+
     public List<BaseAITeam> Teams = new List<BaseAITeam>(1);
 
     public static TeamManager TM;
@@ -37,7 +43,7 @@ public class TeamManager : MonoBehaviour
 
     #region Classes
 
-    #region Public  
+    #region Public
 
     #endregion
 
@@ -65,6 +71,14 @@ public class TeamManager : MonoBehaviour
                     team.StartingLocation = GetRandomMapLocation();
                 }
             }
+
+            for (int i = 0; i < Gold; ++i)
+            {
+                team.BuildingsList[0].DeliverProducts(Products.Gold);
+            }
+
+            team.Population.CitizenCount = Civilians;
+            team.Population.MerchantCount = Merchants;
 
             team.isTeamActive = true;
         }
@@ -205,6 +219,7 @@ public class TeamManagerEditor : Editor
     private bool IsAddingTeam = false;
     private TeamManager myTeamManager;
     private bool isDisplayingTeams = true;
+    private bool isDisplayingStartingCons = false;
 
     private int posWidth = 103;
     private int rowLabelWidth = 27;
@@ -225,7 +240,11 @@ public class TeamManagerEditor : Editor
     public override void OnInspectorGUI()
     {
         myTeamManager.TestTeams();
-        
+
+        EditorGUILayout.Space();
+
+        DisplayStartingConditions();
+
         EditorGUILayout.Space();
 
         NewTeamOptions();
@@ -234,6 +253,20 @@ public class TeamManagerEditor : Editor
 
         DisplayTeams();
 
+    }
+
+    void DisplayStartingConditions()
+    {
+        isDisplayingStartingCons = EditorGUILayout.Foldout(isDisplayingStartingCons, "Starting Conditions");
+
+        if (isDisplayingStartingCons)
+        {
+            myTeamManager.Gold = EditorGUILayout.IntField("Starting Gold:", myTeamManager.Gold);
+
+            myTeamManager.Civilians = EditorGUILayout.IntField("Starting Civilians:", myTeamManager.Civilians);
+
+            myTeamManager.Merchants = EditorGUILayout.IntField("Starting Merchants:", myTeamManager.Merchants);
+        }
     }
 
     void DisplayTeams()

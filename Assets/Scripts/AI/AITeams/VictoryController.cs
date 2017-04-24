@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class VictoryController : MonoBehaviour
 {
@@ -23,6 +24,10 @@ public class VictoryController : MonoBehaviour
     public List<int> CulturalScores;
 
     List<int> RemainingTeams;
+
+    public GameObject VictoryScreen;
+    public Text WinningTeam;
+    public Text VictoryType;
 
     private void Start()
     {
@@ -119,7 +124,19 @@ public class VictoryController : MonoBehaviour
 
     void InitiateVictory(int Team, VictoryTypes VictoryMode)
     {
+        for(int i = 0; i < TeamManager.TM.Teams.Count; ++i)
+        {
+            TeamManager.TM.Teams[i].isTeamActive = false;
+        }
 
+        VictoryScreen.SetActive(true);
+        WinningTeam.text = "Team " + Team + " is Victorious";
+        VictoryType.text = "They won through a " + VictoryMode.ToString() + " victory";
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
 }

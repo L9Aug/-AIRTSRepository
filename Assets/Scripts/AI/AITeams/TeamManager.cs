@@ -239,11 +239,13 @@ public class TeamManagerEditor : Editor
 
     public override void OnInspectorGUI()
     {
+        DrawDefaultInspector();
+
         myTeamManager.TestTeams();
 
         EditorGUILayout.Space();
 
-        DisplayStartingConditions();
+        //DisplayStartingConditions();
 
         EditorGUILayout.Space();
 

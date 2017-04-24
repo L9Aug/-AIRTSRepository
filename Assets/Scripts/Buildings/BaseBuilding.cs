@@ -304,6 +304,13 @@ public class BaseBuilding : GameEntity
         // Here change the update the model to the actual building model rather than the construction model.
         OperationalModelData.SetActive(true);
 
+        //Building.BuildingArea = MapGenerator.Map[(int)Building.hexTransform.RowColumn.x, (int)Building.hexTransform.RowColumn.y].GetHexArea(Building.Size);
+
+        foreach(HexTile hex in BuildingArea)
+        {
+            hex.ClearConnections();
+        }
+
         if (ConstructionCallbacks.Count > 0)
         {
             for (int i = 0; i < ConstructionCallbacks.Count; ++i)

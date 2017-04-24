@@ -14,12 +14,6 @@ public class UnitProduction : BaseProduction
     #region Public
 
     /// <summary>
-    /// The products required for this building to function.
-    /// </summary>
-    [Tooltip("The Products required for this building to function.")]
-    public List<Products> ProductionRequirements = new List<Products>();
-
-    /// <summary>
     /// The unit/s that this building creates.
     /// </summary>
     [Tooltip("The unit/s that this building creates.")]
@@ -114,38 +108,13 @@ public class UnitProduction : BaseProduction
         }
     }
 
-    private object ProductCheck()
-    {
-        bool haveProducts = true;
-
-        for(int i = 0; i < ProductionRequirements.Count; ++i)
-        {
-            if(ProductionStorage[i] == 0)
-            {
-                haveProducts = false;
-                break;
-            }
-        }
-
-        return haveProducts;
-    }
-
     private object FutureProductCheck()
     {
-        bool haveProducts = true;
-
-        for (int i = 0; i < ProductionRequirements.Count; ++i)
+        if(GetMissingProducts().Count > 0)
         {
-            /*
-            if(ProductionStorage[i] < 5)
-            {
-                haveProducts = false;
-                break;
-            }
-            */
+            return false;
         }
-
-        return haveProducts;
+        return true;
     }
 
     private object AreProductsOnMap()
@@ -155,7 +124,7 @@ public class UnitProduction : BaseProduction
 
     private object HaveISentACourier()
     {
-        return false;
+        return CourierCount == 0;
     }
 
     private void SetupDecisionTree()
@@ -174,7 +143,7 @@ public class UnitProduction : BaseProduction
         // create leaves
         Leaf WaitForNextCycle = new Leaf();
 
-        Leaf SendCourierForProducts = new Leaf();
+        Leaf SendCourierForProducts = new Leaf(SendCourierForProductsFunc);
 
         Leaf BeginProductionLeaf = new Leaf(BeginProduction);
 

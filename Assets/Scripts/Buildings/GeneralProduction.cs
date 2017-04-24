@@ -15,9 +15,7 @@ public class GeneralProduction : BaseProduction
 
     #region Variables
 
-    #region Public
-
-    
+    #region Public    
 
     /// <summary>
     /// The product this building creates.
@@ -78,9 +76,9 @@ public class GeneralProduction : BaseProduction
     protected override void BeginProduction()
     {
         base.BeginProduction();
-        for(int i = 0; i < ProductionStorage.Count; ++i)
+        for (int i = 0; i < ProductionRequirements.Count; ++i)
         {
-            --ProductionStorage[i];
+            ProductionStorage.Remove(ProductionStorage.Find(x => x == ProductionRequirements[i]));
         }
     }
 
@@ -95,34 +93,11 @@ public class GeneralProduction : BaseProduction
 
     private object FutureProductsTest()
     {
-        bool isFull = true;
-
-        foreach(int Ps in ProductionStorage)
+        if (GetMissingProducts().Count > 0)
         {
-            if(Ps < 5)
-            {
-                isFull = false;
-                break;
-            }
+            return false;
         }
-
-        return isFull;
-    }
-
-    private object ProductCheck()
-    {
-        bool HaveProducts = true;
-
-        foreach(int Ps in ProductionStorage)
-        {
-            if(Ps == 0)
-            {
-                HaveProducts = false;
-                break;
-            }
-        }
-
-        return HaveProducts;
+        return true;
     }
 
     private object AreProductsOnMap()
@@ -150,9 +125,9 @@ public class GeneralProduction : BaseProduction
 
         Leaf beginProduction = new Leaf(BeginProduction);
 
-        Leaf SendCourierWithProducts = new Leaf();
+        Leaf SendCourierWithProducts = new Leaf(SendCourierWithProductsFunc);
 
-        Leaf SendCourierForProducts = new Leaf();
+        Leaf SendCourierForProducts = new Leaf(SendCourierForProductsFunc);
 
         Vertex HasCourierBeenSentForProducts = new Vertex(DoIHaveACourier, WaitForNextCycle, SendCourierForProducts);
 

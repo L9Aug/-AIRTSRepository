@@ -227,7 +227,10 @@ public class BaseAITeam : MonoBehaviour
 
                 for (int i = 0; i < possibleTiles.Count; ++i)
                 {
-                    yield return null;
+                    if (Time.realtimeSinceStartup - MapGenerator.FrameStartTime >= (1 / 60f))
+                    {
+                        yield return null;
+                    }
                     if (ValidateArea(possibleTiles[i].hexTransform.RowColumn, buildingSize))
                     {
                         BuildingBaseTile = possibleTiles[i];
@@ -272,7 +275,10 @@ public class BaseAITeam : MonoBehaviour
 
                 for (int i = 0; i < possibleTiles.Count; ++i)
                 {
-                    yield return null;
+                    if (Time.realtimeSinceStartup - MapGenerator.FrameStartTime >= (1 / 60f))
+                    {
+                        yield return null;
+                    }
                     List<HexTile> leveltwoPossibleTiles = MapGenerator.Map[(int)possibleTiles[i].hexTransform.RowColumn.x, (int)possibleTiles[i].hexTransform.RowColumn.y].GetHexArea(buildingSize);
                     for (int j = 0; j < leveltwoPossibleTiles.Count; ++j)
                     {

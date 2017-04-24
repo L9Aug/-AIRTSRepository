@@ -21,7 +21,7 @@ public class MapGenerator : MonoBehaviour
     [Tooltip("The framerate that you want the generation to run at.\nAt 0 it will generate it in one frame.")]
     public float TargetFrameRate;
 
-    float FrameStartTime = 0;
+    public static float FrameStartTime = 0;
 
     TeamManager teamManager;
 

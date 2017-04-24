@@ -168,7 +168,7 @@ public class RawProduction : BaseProduction
 
         Leaf BeginProductionLeaf = new Leaf(BeginProduction);
 
-        Leaf SendCourierLeaf = new Leaf();
+        Leaf SendCourierLeaf = new Leaf(SendCourierWithProductsFunc);
 
         Leaf HaltProduction = new Leaf();
 

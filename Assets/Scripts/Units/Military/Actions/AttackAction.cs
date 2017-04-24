@@ -23,15 +23,30 @@ public class AttackAction : TargetedAction
         effects.Add(Attack);
     }
 
+    public override bool CanRun(GOAPAgent agent)
+    {
+        return Vector3.Distance(unit.target.transform.position, unit.transform.position) < unit.attackRange;
+    }
+
     void Attack()
     {
-        unit.target.GetComponent<BaseUnit>().DealDamage(unit.damage);
+        if (unit.target.GetComponent<GameEntity>() != null)
+        {
+            unit.target.GetComponent<GameEntity>().DealDamage(unit.damage);
+        }
+        else
+        {
+            Debug.Log("Attacking an invalid target");
+        }
     }
 
 	// Use this for initialization
 	void Start ()
     {
         unit = GetComponent <MilitaryUnit>();
+        SetupPreconditions();
+        SetUpEffects();
+        SetupSatisfactions();
 	}
 	
 	// Update is called once per frame

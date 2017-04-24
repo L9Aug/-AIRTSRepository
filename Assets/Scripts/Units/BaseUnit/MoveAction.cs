@@ -12,6 +12,17 @@ public class MoveAction : GOAPAction
         AddPrecondition(new GOAPState("Has Path", true));
     }
 
+    public void SetupSatisfactions()
+    {
+        satisfiesStates = new List<GOAPState>
+        {
+            new GOAPState("At Destination", true),
+            new GOAPState("At Home", true),
+            new GOAPState("Target in Range", true),
+
+        };
+    }
+
     public override bool TestForFinished()
     {
         if((unit.hexTransform.CalcHexManhattanDist(unit.Destination) == 0))

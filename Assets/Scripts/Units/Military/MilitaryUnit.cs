@@ -46,6 +46,12 @@ public class MilitaryUnit : BaseUnit
         }
     }
 
+    public void Initialise(int teamId, HexTile startingTile)
+    {
+        TeamID = teamId;
+        hexTransform = startingTile.hexTransform;
+    }
+
     public override void GetPath()
     {
         //path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, , HeuristicFunc);

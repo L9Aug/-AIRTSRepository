@@ -51,12 +51,47 @@ public class UnitProduction : BaseProduction
                 for (int i = 0; i < UnitOutput.Count; ++i)
                 {
                     print("New " + UnitOutput[i].ToString() + " for Team " + TeamID);
+                    HexTile tileToUse = EntranceTiles[Random.Range(0, EntranceTiles.Count - 1)];
+                    switch (UnitOutput[i])
+                    {
+                        case Units.Soldier:
+                            CreateMilitaryUnit(Units.Soldier, tileToUse);
+                            break;
+                        case Units.Archer:
+                            CreateMilitaryUnit(Units.Archer, tileToUse);
+                            break;
+                        case Units.Catapult:
+                            CreateMilitaryUnit(Units.Catapult, tileToUse);
+                            break;
+                        case Units.Builder:
+
+                            break;
+                        case Units.Courier:
+
+                            break;
+                        case Units.Merchant:
+                            TeamManager.TM.Teams[TeamID].Population.MerchantCount++;
+                            TeamManager.TM.Teams[TeamID].Population.Merchants.Add(Instantiate(GlobalAttributes.Global.Units[(int)Units.Merchant], tileToUse.transform.position, Quaternion.identity, transform.parent));
+                            TeamManager.TM.Teams[TeamID].Population.Merchants[TeamManager.TM.Teams[TeamID].Population.Merchants.Count - 1].GetComponent<Merchant>().Initialise(this, TeamManager.TM.Teams[TeamID].BuildingsList[0], TeamID, tileToUse);
+                            break;
+                        case Units.Citizen:
+                            TeamManager.TM.Teams[TeamID].Population.CitizenCount++;
+                            TeamManager.TM.Teams[TeamID].Population.Citizens.Add(Instantiate(GlobalAttributes.Global.Units[(int)Units.Citizen], tileToUse.transform.position, Quaternion.identity, transform.parent));
+                            TeamManager.TM.Teams[TeamID].Population.Citizens[TeamManager.TM.Teams[TeamID].Population.Citizens.Count - 1].GetComponent<Merchant>().Initialise(this, TeamManager.TM.Teams[TeamID].BuildingsList[0], TeamID, tileToUse);
+                            break;
+                    }
                     ProductionFinished();
                 }
                 ProductionTimer = 0;
                 inProduction = false;
             }
         }
+    }
+
+    void CreateMilitaryUnit(Units unit, HexTile tileToUse)
+    {
+        TeamManager.TM.Teams[TeamID].Population.Military.Add(Instantiate(GlobalAttributes.Global.Units[(int)unit], tileToUse.transform.position, Quaternion.identity, transform.parent));
+        TeamManager.TM.Teams[TeamID].Population.Military[TeamManager.TM.Teams[TeamID].Population.Military.Count - 1].GetComponent<MilitaryUnit>().Initialise(TeamID, tileToUse);
     }
 
     protected override IEnumerator DecisionTreeRunIntervals()

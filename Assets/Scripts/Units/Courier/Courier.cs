@@ -78,6 +78,14 @@ public class Courier : BaseUnit
         }
     }
 
+    public override void GetNewDestination()
+    {
+        BaseBuilding temp = new BaseBuilding();
+        temp = HomeBuilding;
+        HomeBuilding = DestinationBuilding;
+        DestinationBuilding = temp;
+    }
+
     public override void GetPath()
     {
         path = aStar.AStar(MapGenerator.Map[(int)hexTransform.RowColumn.x, (int)hexTransform.RowColumn.y].ASI, DestinationBuilding.EntranceTiles[Random.Range(0, DestinationBuilding.EntranceTiles.Count)].ASI, HeuristicFunc);

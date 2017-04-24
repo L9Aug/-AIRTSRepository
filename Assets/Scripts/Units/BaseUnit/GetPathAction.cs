@@ -12,6 +12,14 @@ public class GetPathAction : GOAPAction
         AddPrecondition(new GOAPState("Has Path", false));
     }
 
+    void SatisfiesStates()
+    {
+        satisfiesStates = new List<GOAPState>
+        {
+            new GOAPState("Has Path", true)
+        };
+    }
+
     void SetupEffects()
     {
         AddEffect(unit.GetPath);

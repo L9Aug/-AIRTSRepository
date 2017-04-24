@@ -20,7 +20,6 @@ public class Builder : BaseUnit
    
     public void Initialise (BaseBuilding home, BaseBuilding assign, int teamID, Products Gold, HexTile startTile)
     {
-        TeamManager.TM.Teams[TeamID].Population.CitizenCount--;
         homeBuilding = home;
         assignedBuilding = assign;
         TeamID = teamID;

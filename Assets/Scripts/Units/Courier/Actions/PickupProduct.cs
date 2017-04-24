@@ -48,7 +48,12 @@ public class PickupProduct : TargetedAction
 
     public override bool TestForFinished()
     {
-        return (unit.ticketList[0].ProductOwner != unit.DestinationBuilding);
+        if (unit.ticketList[0].ProductOwner != unit.DestinationBuilding)
+        {
+            unit.GetNewDestination();
+            return true;
+        }
+        return false;
     }
 
 	// Use this for initialization

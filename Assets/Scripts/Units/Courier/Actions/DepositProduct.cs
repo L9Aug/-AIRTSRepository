@@ -5,7 +5,7 @@ using GOAP;
 
 public class DepositProduct : TargetedAction
 {
-    new BaseBuilding target;
+    BaseBuilding target;
     Courier unit;
     
     void SetupRequirements()

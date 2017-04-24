@@ -128,7 +128,8 @@ public class HexTile : MonoBehaviour
     public void ConfigureTile(int q, int r)
     {
         hexTransform = new HexTransform(q, r);
-        SetTexture(TerrainTypes.Plains);
+        SetTexture(TerrainTypes.Sea);
+        TerrainType = TerrainTypes.Sea;
 
         ASI = new AStarInfo<HexTile>(this, 1);
     }

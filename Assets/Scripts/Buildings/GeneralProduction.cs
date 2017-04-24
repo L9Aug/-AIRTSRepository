@@ -40,6 +40,14 @@ public class GeneralProduction : BaseProduction
         base.Start();
 
         SetupDecisionTree();
+
+        for(int i = 0; i < 10; ++i)
+        {
+            for (int j = 0; j < ProductionRequirements.Count; ++j) {
+                ProductionStorage.Add(ProductionRequirements[j] == Products.Food ? Products.Water : ProductionRequirements[j]);
+            }
+        }
+
     }
 
     protected override void Update()

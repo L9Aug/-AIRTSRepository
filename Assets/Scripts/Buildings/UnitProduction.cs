@@ -32,6 +32,14 @@ public class UnitProduction : BaseProduction
         base.Start();
 
         SetupDecisionTree();
+
+        for (int i = 0; i < 10; ++i)
+        {
+            for (int j = 0; j < ProductionRequirements.Count; ++j)
+            {
+                ProductionStorage.Add(ProductionRequirements[j] == Products.Food ? Products.Bread : ProductionRequirements[j]);
+            }
+        }
     }
 
     protected override void Update()
@@ -77,7 +85,7 @@ public class UnitProduction : BaseProduction
                         case Units.Citizen:
                             TeamManager.TM.Teams[TeamID].Population.CitizenCount++;
                             TeamManager.TM.Teams[TeamID].Population.Citizens.Add(Instantiate(GlobalAttributes.Global.Units[(int)Units.Citizen], tileToUse.transform.position, Quaternion.identity, transform.parent));
-                            TeamManager.TM.Teams[TeamID].Population.Citizens[TeamManager.TM.Teams[TeamID].Population.Citizens.Count - 1].GetComponent<Merchant>().Initialise(this, TeamManager.TM.Teams[TeamID].BuildingsList[0], TeamID, tileToUse);
+                            TeamManager.TM.Teams[TeamID].Population.Citizens[TeamManager.TM.Teams[TeamID].Population.Citizens.Count - 1].GetComponent<Citizen>().Initialise(this, TeamManager.TM.Teams[TeamID].BuildingsList[0], TeamID, tileToUse);
                             break;
                     }
                     ProductionFinished();
